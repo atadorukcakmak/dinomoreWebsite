@@ -368,3 +368,39 @@ function showFormMessage(message, isSuccess) {
 } 
 
 // Tema ile ilgili tüm fonksiyonlar ve event handler'lar kaldırıldı. 
+
+// Scroll ile animasyonlu fade-in
+function handleScrollFadeIn() {
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const windowHeight = window.innerHeight;
+  fadeEls.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < windowHeight - 40) {
+      el.classList.add('visible');
+    }
+  });
+}
+
+function addFadeInToElements() {
+  const selectors = [
+    '.game-card',
+    '.about-content',
+    '.contact-container',
+    '.footer-content',
+    '.engine-logos-bar',
+    '.games-section-box',
+    '.games-group',
+    '.coming-soon-animated'
+  ];
+  selectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.classList.add('fade-in');
+    });
+  });
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  addFadeInToElements();
+  handleScrollFadeIn();
+  window.addEventListener('scroll', handleScrollFadeIn);
+}); 
