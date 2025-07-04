@@ -16,6 +16,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Orbitron:wght@700&family=Michroma&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="dino.png" sizes="64x64">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" onload="this.rel='stylesheet'">
     <style>
         body, input, button, textarea {
             font-family: 'Montserrat', sans-serif;
@@ -61,11 +66,13 @@
         <div class="menu-btn">
             <i class="fas fa-bars"></i>
         </div>
+        <!-- Tema butonu kaldırıldı -->
     </nav>
 
     <!-- Mobil Üst Logo Barı -->
     <div class="mobile-logo-bar">
         <img src="logo.png" alt="Dinomore Logo" class="mobile-logo-img" onclick="window.scrollTo({top:0,behavior:'smooth'})" />
+        <!-- Mobil tema butonu kaldırıldı -->
     </div>
 
     <!-- Mobil Alt Bar Menü -->
@@ -75,6 +82,8 @@
         <a href="#games" class="bottom-bar-link"><i class="fas fa-gamepad"></i><span>Games</span></a>
         <a href="#contact" class="bottom-bar-link"><i class="fas fa-envelope"></i><span>Contact</span></a>
     </nav>
+
+    <!-- Sağ alt köşe tema butonu kaldırıldı -->
 
     <!-- Hero Section -->
     <section class="hero">
@@ -89,11 +98,8 @@
     <section id="about" class="about">
         <h2 data-i18n="about.title">About Us</h2>
         <div class="about-content">
-            <div class="about-text">
+            <div class="about-text" style="text-align:center;width:100%;">
                 <p data-i18n="about.description" style="font-family:'Montserrat',sans-serif;font-weight:400;">Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5, Xbox One, Nintendo Switch, and PC platforms. We also provide porting services for previously developed games. With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal Engine game engines.</p>
-            </div>
-            <div class="about-image">
-                <i class="fas fa-gamepad"></i>
             </div>
         </div>
     </section>
@@ -103,7 +109,7 @@
         <h2 data-i18n="games.title">Our Games</h2>
         <div class="games-section-box">
             <div class="games-group">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.playstation">PlayStation Games</h3>
+                <h3 class="platform-title platform-title-dmsans" data-i18n="games.playstation"><img src="psLogo.png" alt="PlayStation Logo" class="platform-logo" /> PlayStation Games</h3>
                 <div class="games-cards-flex">
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
@@ -115,7 +121,7 @@
             </div>
             <div class="vertical-divider"></div>
             <div class="games-group">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.nintendo">Nintendo Switch Games</h3>
+                <h3 class="platform-title platform-title-dmsans" data-i18n="games.nintendo"><img src="nintendoSwitchLogo.png" alt="Nintendo Switch Logo" class="platform-logo" /> Nintendo Switch Games</h3>
                 <div class="games-cards-flex">
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
@@ -129,7 +135,7 @@
         <br><br><br>
         <div class="games-section-box" style="margin-top: 32px;">
             <div class="games-group" style="width:100%;">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.steam">Steam Games</h3>
+                <h3 class="platform-title platform-title-dmsans" data-i18n="games.steam"><img src="steamLogo.png" alt="Steam Logo" class="platform-logo" /> Steam Games</h3>
                 <div class="games-cards-flex">
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
                     <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
@@ -141,6 +147,12 @@
                 </div>
             </div>
         </div>
+        <!-- Oyun motoru logoları -->
+        <div class="engine-logos-bar">
+            <img src="unityLogo.png" alt="Unity Logo" class="engine-logo" />
+            <img src="unrealEngineLogo.png" alt="Unreal Engine Logo" class="engine-logo unreal" />
+        </div>
+
     </section>
 
     <!-- Contact Section -->

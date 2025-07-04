@@ -1,3 +1,10 @@
+console.log("Script yüklendi!");
+document.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    console.log("Butona tıklandı!", btn.className);
+  });
+});
+
 let currentLang = 'en';
 const translations = {
     en: {
@@ -75,9 +82,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
-        target.scrollIntoView({
-            behavior: 'smooth'
-        });
+        if (target) {
+            const rect = target.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            // Offset: masaüstü ve mobilde üstteki barlar için 80px
+            const offset = 80;
+            const top = rect.top + scrollTop - offset;
+            window.scrollTo({
+                top,
+                behavior: 'smooth'
+            });
+        }
         // Close mobile menu if open
         if (window.innerWidth <= 768) {
             navLinks.classList.remove('active');
@@ -351,3 +366,5 @@ function showFormMessage(message, isSuccess) {
         }, 3000);
     }
 } 
+
+// Tema ile ilgili tüm fonksiyonlar ve event handler'lar kaldırıldı. 
