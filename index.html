@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinomore - Gaming Company</title>
+    <title>Dinomore Games</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Orbitron:wght@700&family=Michroma&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="dino.png" sizes="64x64">
     <style>
         body, input, button, textarea {
             font-family: 'Montserrat', sans-serif;
@@ -62,6 +63,19 @@
         </div>
     </nav>
 
+    <!-- Mobil Üst Logo Barı -->
+    <div class="mobile-logo-bar">
+        <img src="logo.png" alt="Dinomore Logo" class="mobile-logo-img" onclick="window.scrollTo({top:0,behavior:'smooth'})" />
+    </div>
+
+    <!-- Mobil Alt Bar Menü -->
+    <nav class="mobile-bottom-bar">
+        <a href="#" class="bottom-bar-link" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#about" class="bottom-bar-link"><i class="fas fa-users"></i><span>About</span></a>
+        <a href="#games" class="bottom-bar-link"><i class="fas fa-gamepad"></i><span>Games</span></a>
+        <a href="#contact" class="bottom-bar-link"><i class="fas fa-envelope"></i><span>Contact</span></a>
+    </nav>
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
@@ -76,7 +90,7 @@
         <h2 data-i18n="about.title">About Us</h2>
         <div class="about-content">
             <div class="about-text">
-                <p data-i18n="about.description" style="font-family:'Montserrat',sans-serif;font-weight:400;">Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5,Xbox One, Nintendo Switch, and PC platforms. We also provide porting services for previously developed games. With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal Engine game engines.</p>
+                <p data-i18n="about.description" style="font-family:'Montserrat',sans-serif;font-weight:400;">Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5, Xbox One, Nintendo Switch, and PC platforms. We also provide porting services for previously developed games. With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal Engine game engines.</p>
             </div>
             <div class="about-image">
                 <i class="fas fa-gamepad"></i>
