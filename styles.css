@@ -1780,6 +1780,15 @@ section.games, .games-section-box, .games-group {
   }
 } 
 
+#about, .about, #contact, .contact {
+  background: #181a1b !important;
+}
+@media (max-width: 768px) {
+  #about, .about, #contact, .contact {
+    background: #181a1b !important;
+  }
+} 
+
 #about {
   margin-bottom: 2.5rem !important;
 } 
