@@ -58,6 +58,20 @@
             <a href="#about" data-i18n="nav.about">About Us</a>
             <a href="#games" data-i18n="nav.games">Games</a>
             <a href="#contact" data-i18n="nav.contact">Contact</a>
+            <div class="social-links nav-social-links" aria-label="Social media links">
+                <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.tiktok.com/@dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://discord.gg/dinomore" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+                    <i class="fab fa-discord"></i>
+                </a>
+            </div>
             <div class="language-selector">
                 <button onclick="changeLanguage('en')" class="lang-btn">EN</button>
                 <button onclick="changeLanguage('tr')" class="lang-btn">TR</button>
@@ -90,7 +104,19 @@
         <div class="hero-content">
             <h1 data-i18n="hero.title">Welcome to Dinomore</h1>
             <p data-i18n="hero.subtitle" style="font-family:'Montserrat',sans-serif;font-weight:400;">Where Gaming Dreams Come True</p>
-            <a href="#games" class="cta-button" data-i18n="hero.cta">Discover Our Games</a>
+
+            <div class="hero-video">
+                <iframe id="heroVideoIframe" class="hero-video-element" src="https://www.youtube.com/embed/-OchRBMDkdo?autoplay=1&mute=1&controls=0&loop=1&playlist=-OchRBMDkdo&modestbranding=1&showinfo=0&playsinline=1&enablejsapi=1" title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                <div class="video-audio-toggle">
+                    <button id="hero-audio-toggle" class="video-audio-btn" data-state="muted" data-i18n="hero.unmute">Unmute</button>
+                </div>
+            </div>
+
+            <p class="hero-game-info" data-i18n="hero.gameDescription">Add our latest game Kamikaze Strike FPV Drone to your wishlist to get notified at launch!!</p>
+            <div class="hero-actions">
+                <a class="wishlist-button" href="https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/" target="_blank" rel="noopener noreferrer" data-i18n="hero.wishlist">Add to Wishlist on Steam</a>
+                <a href="#games" class="cta-button" data-i18n="hero.cta">Discover Our Games</a>
+            </div>
         </div>
     </section>
 
@@ -184,6 +210,20 @@
         <div class="footer-content">
             <div class="footer-logo">
                 <img src="logo.png" alt="Dinomore Logo" style="height: 134px; width: auto; display: block;" />
+            </div>
+            <div class="social-links" aria-label="Social media links">
+                <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.tiktok.com/@dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://discord.gg/dinomore" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+                    <i class="fab fa-discord"></i>
+                </a>
             </div>
             <p data-i18n="footer.copyright">&copy; 2025 Dinomore. All rights reserved.</p>
         </div>

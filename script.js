@@ -1,4 +1,22 @@
 console.log("Script yüklendi!");
+function logHero() {
+  try {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('[HERO-VIDEO]');
+    console.log.apply(console, args);
+  } catch (e) {
+    try {
+      console.log('[HERO-VIDEO] (fallback)', arguments);
+    } catch (err) {}
+  }
+}
+// Global error hooks to surface silent errors
+window.addEventListener('error', function(ev){
+  logHero('window.error:', ev && ev.message, ev && ev.filename, ev && ev.lineno, ev && ev.colno);
+});
+window.addEventListener('unhandledrejection', function(ev){
+  logHero('unhandledrejection:', ev && ev.reason);
+});
 document.querySelectorAll('button').forEach(btn => {
   btn.addEventListener('click', () => {
     console.log("Butona tıklandı!", btn.className);
@@ -15,6 +33,10 @@ const translations = {
         "hero.title": "Welcome to Dinomore",
         "hero.subtitle": "Where Gaming Dreams Come True",
         "hero.cta": "Discover Our Games",
+        "hero.gameDescription": "Our upcoming game is in development. Add it to your wishlist to get notified at launch!",
+        "hero.wishlist": "Add to Wishlist on Steam",
+        "hero.unmute": "Unmute",
+        "hero.mute": "Mute",
         "about.title": "About Us",
         "about.description": " Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5,Xbox One, Nintendo Switch, and PC platforms. We also provide porting services for previously developed games. With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal Engine game engines.",
         "games.title": "Our Games",
@@ -45,6 +67,10 @@ const translations = {
         "hero.title": "Dinomore'a Hoş Geldiniz",
         "hero.subtitle": "Oyun Hayalleri Gerçeğe Dönüşüyor",
         "hero.cta": "Oyunlarımızı Keşfedin",
+        "hero.gameDescription": "Yeni oyunumuz geliştirme aşamasında. Çıkışta haberdar olmak için istek listenize ekleyin!",
+        "hero.wishlist": "Steam'de İstek Listesine Ekle",
+        "hero.unmute": "Sesi Aç",
+        "hero.mute": "Sesi Kapat",
         "about.title": "Hakkımızda",
         "about.description": "Haziran 2025'te kurulan Dinomore Games, PlayStation 4, PlayStation 5, Xbox One, Nintendo Switch ve PC platformları için oyunlar geliştirmektedir. Ayrıca, daha önce geliştirilmiş oyunlar için portlama hizmetleri de sunmaktayız. Genç ve dinamik bir ekiple çalışan Dinomore Games, Unity ve Unreal Engine oyun motorları için içerikler de üretmektedir.",
         "games.title": "Oyunlarımız",
@@ -78,22 +104,37 @@ menuBtn.addEventListener('click', () => {
 });
 
 // Smooth Scrolling for Navigation Links
+function getHeaderOffset() {
+    const navbar = document.querySelector('.navbar');
+    const mobileTopBar = document.querySelector('.mobile-logo-bar');
+    const isMobile = window.innerWidth <= 768;
+    const navbarHeight = (navbar ? navbar.offsetHeight : 0);
+    const mobileBarHeight = (isMobile && mobileTopBar ? mobileTopBar.offsetHeight : 0);
+    return Math.max(navbarHeight, mobileBarHeight, 0) + 24; // başlık için ekstra boşluk
+}
+
+function applyScrollMarginTop() {
+    const offset = getHeaderOffset();
+    document.querySelectorAll('section').forEach(sec => {
+        sec.style.scrollMarginTop = offset + 'px';
+    });
+}
+
+function scrollToWithOffset(target) {
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const top = rect.top + scrollTop - getHeaderOffset();
+    window.scrollTo({ top, behavior: 'smooth' });
+}
+
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-            const rect = target.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            // Offset: masaüstü ve mobilde üstteki barlar için 80px
-            const offset = 80;
-            const top = rect.top + scrollTop - offset;
-            window.scrollTo({
-                top,
-                behavior: 'smooth'
-            });
+            scrollToWithOffset(target);
         }
-        // Close mobile menu if open
         if (window.innerWidth <= 768) {
             navLinks.classList.remove('active');
         }
@@ -334,6 +375,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialLang = savedLang || (browserLang === 'tr' ? 'tr' : 'en');
     
     changeLanguage(initialLang);
+    // Debug current iframe src and params
+    const heroIframe = document.getElementById('heroVideoIframe');
+    if (heroIframe) {
+      logHero('Iframe found. Initial src:', heroIframe.src);
+      try {
+        const u = new URL(heroIframe.src);
+        logHero('enablejsapi:', u.searchParams.get('enablejsapi'), 'origin:', u.searchParams.get('origin'));
+      } catch (e) {
+        logHero('URL parse error:', e);
+      }
+    } else {
+      logHero('Iframe NOT found at DOMContentLoaded');
+    }
+    // Ensure embed has origin param for YouTube API controls
+    if (heroIframe && heroIframe.src) {
+        try {
+            const u = new URL(heroIframe.src);
+            if (!u.searchParams.has('origin') && window.location.origin && window.location.origin !== 'null') {
+                u.searchParams.set('origin', window.location.origin);
+                heroIframe.src = u.toString();
+            }
+        } catch (e) {}
+    }
+    applyScrollMarginTop();
+    // Load YouTube Iframe API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.addEventListener('load', () => logHero('YouTube Iframe API script loaded'));
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    if (firstScriptTag && firstScriptTag.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    } else {
+        document.head.appendChild(tag);
+    }
 });
 
 // Sağ alttaki sabit scroll-to-top butonu
@@ -404,3 +479,105 @@ window.addEventListener('DOMContentLoaded', function() {
   handleScrollFadeIn();
   window.addEventListener('scroll', handleScrollFadeIn);
 }); 
+
+window.addEventListener('resize', function() {
+  applyScrollMarginTop();
+});
+
+// YouTube player setup and audio toggle logic
+let heroPlayer;
+let heroPlayerReady = false;
+let pendingUnmute = false;
+window.onYouTubeIframeAPIReady = function() {
+  console.log('onYouTubeIframeAPIReady called');
+  const iframe = document.getElementById('heroVideoIframe');
+  if (!iframe || !window.YT || !YT.Player) return;
+  heroPlayer = new YT.Player('heroVideoIframe', {
+    events: {
+      onReady: function(event) {
+        console.log('Player onReady fired');
+        heroPlayerReady = true;
+        try {
+          event.target.mute();
+          event.target.playVideo();
+          logHero('Muted and playVideo() invoked in onReady');
+        } catch (e) {
+          logHero('Error in onReady mute/play:', e);
+        }
+        if (pendingUnmute) {
+          try {
+            event.target.unMute();
+            event.target.setVolume(100);
+            event.target.playVideo();
+            logHero('Pending unmute applied');
+          } catch (e) {
+            logHero('Error applying pending unmute:', e);
+          }
+          pendingUnmute = false;
+        }
+        try {
+          logHero('Initial state after ready => isMuted:', event.target.isMuted && event.target.isMuted(), 'volume:', event.target.getVolume && event.target.getVolume());
+        } catch (e) {}
+      },
+      onStateChange: function(e) {
+        const map = { '-1': 'UNSTARTED', 0: 'ENDED', 1: 'PLAYING', 2: 'PAUSED', 3: 'BUFFERING', 5: 'CUED' };
+        let muted = null, vol = null;
+        try { muted = heroPlayer && heroPlayer.isMuted && heroPlayer.isMuted(); } catch (err) {}
+        try { vol = heroPlayer && heroPlayer.getVolume && heroPlayer.getVolume(); } catch (err) {}
+        logHero('onStateChange:', map[e.data] || e.data, 'muted:', muted, 'volume:', vol);
+      },
+      onError: function(err) {
+        logHero('Player error:', err && err.data, err);
+      }
+    }
+  });
+};
+
+const audioToggleBtn = document.getElementById('hero-audio-toggle');
+if (audioToggleBtn) {
+  audioToggleBtn.addEventListener('click', function() {
+    logHero('Audio toggle clicked. heroPlayerReady:', heroPlayerReady, 'heroPlayer exists:', !!heroPlayer);
+    if (!heroPlayer || !heroPlayer.getPlayerState) {
+      pendingUnmute = true;
+      audioToggleBtn.setAttribute('data-state', 'unmuted');
+      audioToggleBtn.textContent = translations[currentLang]['hero.mute'] || 'Mute';
+      logHero('Player not ready yet. Marked pendingUnmute=true');
+      return;
+    }
+    const state = audioToggleBtn.getAttribute('data-state');
+    if (state === 'muted') {
+      try {
+        heroPlayer.playVideo();
+        heroPlayer.unMute();
+        heroPlayer.setVolume(100);
+        logHero('Requested unMute + play + volume=100');
+      } catch (e) {
+        logHero('Error on unmute click:', e);
+      }
+      audioToggleBtn.setAttribute('data-state', 'unmuted');
+      audioToggleBtn.textContent = translations[currentLang]['hero.mute'] || 'Mute';
+    } else {
+      try { heroPlayer.mute(); logHero('Requested mute'); } catch (e) { logHero('Error on mute click:', e); }
+      audioToggleBtn.setAttribute('data-state', 'muted');
+      audioToggleBtn.textContent = translations[currentLang]['hero.unmute'] || 'Unmute';
+    }
+    // Log current state shortly after
+    setTimeout(() => {
+      try {
+        logHero('Post-click => isMuted:', heroPlayer.isMuted && heroPlayer.isMuted(), 'volume:', heroPlayer.getVolume && heroPlayer.getVolume(), 'state:', heroPlayer.getPlayerState && heroPlayer.getPlayerState());
+      } catch (e) {}
+    }, 150);
+  });
+}
+
+// Keep audio button label consistent when language changes
+const originalUpdateContent = updateContent;
+updateContent = function() {
+  originalUpdateContent();
+  const btn = document.getElementById('hero-audio-toggle');
+  if (btn) {
+    const currentState = btn.getAttribute('data-state') || 'muted';
+    btn.textContent = translations[currentLang][currentState === 'unmuted' ? 'hero.mute' : 'hero.unmute']
+      || (currentState === 'unmuted' ? 'Mute' : 'Unmute');
+  }
+}
