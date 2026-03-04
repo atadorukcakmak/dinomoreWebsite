@@ -1,80 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dinomore Games</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="styles.css?v=1.2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Fredoka:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@500;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Recursive:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Orbitron:wght@700&family=Michroma&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@500;700&family=Quicksand:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Recursive:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Orbitron:wght@700&family=Michroma&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="dino.png" sizes="64x64">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" onload="this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" onload="this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" onload="this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" onload="this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" onload="this.rel='stylesheet'">
-    <style>
-        body, input, button, textarea {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 400;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Michroma', sans-serif;
-            font-weight: bold;
-            letter-spacing: 1.2px;
-        }
-        .logo, .logo * {
-            font-family: 'Rajdhani', sans-serif !important;
-            font-weight: 700 !important;
-            letter-spacing: 2px;
-        }
-        .hero-content h1 {
-            font-family: 'Michroma', sans-serif;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        .platform-title-dmsans {
-            font-family: 'DM Sans', sans-serif !important;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-    </style>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap"
+        onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Michroma&display=swap"
+        onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap"
+        onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
+        onload="this.rel='stylesheet'">
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        onload="this.rel='stylesheet'">
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="logo" style="cursor:pointer;" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <a href="#top" class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
             <img src="logo.png" alt="Dinomore Logo" style="height: 50px; width: auto; display: block;" />
-        </div>
+        </a>
         <div class="nav-links">
-            <a href="#about" data-i18n="nav.about">About Us</a>
+            <a href="#hero" data-i18n="nav.home">Home</a>
             <a href="#games" data-i18n="nav.games">Games</a>
+            <a href="#porting" data-i18n="nav.porting">Porting</a>
+            <a href="#internship" data-i18n="nav.internship">Internship</a>
+            <a href="#about" data-i18n="nav.about">About Us</a>
             <a href="#contact" data-i18n="nav.contact">Contact</a>
+        </div>
+        <div class="navbar-right">
             <div class="social-links nav-social-links" aria-label="Social media links">
-                <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer"
+                    aria-label="Instagram">
                     <i class="fab fa-instagram"></i>
                 </a>
-                <a href="https://www.tiktok.com/@dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <a href="https://www.tiktok.com/@kamikazestrikefpvdrone" target="_blank" rel="noopener noreferrer"
+                    aria-label="TikTok">
                     <i class="fab fa-tiktok"></i>
                 </a>
-                <a href="https://www.linkedin.com/company/dinomore-games/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <a href="https://www.youtube.com/@DinomoreGames" target="_blank" rel="noopener noreferrer"
+                    aria-label="YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://www.reddit.com/user/dinomoregames/" target="_blank" rel="noopener noreferrer"
+                    aria-label="Reddit">
+                    <i class="fa-brands fa-reddit"></i>
+                </a>
+                <a href="https://x.com/dinomoregames" target="_blank" rel="noopener noreferrer"
+                    aria-label="X (Twitter)">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/dinomore-games/" target="_blank" rel="noopener noreferrer"
+                    aria-label="LinkedIn">
                     <i class="fab fa-linkedin"></i>
                 </a>
                 <a href="https://discord.gg/AhvAHWSaSX" target="_blank" rel="noopener noreferrer" aria-label="Discord">
                     <i class="fab fa-discord"></i>
                 </a>
             </div>
-            <div class="language-selector">
-                <button onclick="changeLanguage('en')" class="lang-btn">EN</button>
-                <button onclick="changeLanguage('tr')" class="lang-btn">TR</button>
+            <div class="language-dropdown">
+                <button class="lang-dropbtn" id="lang-menu-btn">
+                    <span id="current-lang">EN</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="lang-dropdown-content">
+                    <button onclick="changeLanguage('tr')" class="lang-option">TR</button>
+                    <button onclick="changeLanguage('en')" class="lang-option">EN</button>
+                </div>
             </div>
         </div>
         <div class="menu-btn">
@@ -85,151 +105,468 @@
 
     <!-- Mobil Üst Logo Barı -->
     <div class="mobile-logo-bar">
-        <img src="logo.png" alt="Dinomore Logo" class="mobile-logo-img" onclick="window.scrollTo({top:0,behavior:'smooth'})" />
-        <!-- Mobil tema butonu kaldırıldı -->
+        <img src="logo.png" alt="Dinomore Logo" class="mobile-logo-img"
+            onclick="window.scrollTo({top:0,behavior:'smooth'})" />
+        <div class="language-selector mobile-lang">
+            <button onclick="changeLanguage('tr')" class="lang-btn">TR</button>
+            <button onclick="changeLanguage('en')" class="lang-btn">EN</button>
+        </div>
     </div>
 
     <!-- Mobil Alt Bar Menü -->
     <nav class="mobile-bottom-bar">
-        <a href="#" class="bottom-bar-link" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#about" class="bottom-bar-link"><i class="fas fa-users"></i><span>About</span></a>
-        <a href="#games" class="bottom-bar-link"><i class="fas fa-gamepad"></i><span>Games</span></a>
-        <a href="#contact" class="bottom-bar-link"><i class="fas fa-envelope"></i><span>Contact</span></a>
+        <a href="#" class="bottom-bar-link" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i
+                class="fas fa-home"></i><span data-i18n="nav.home">Home</span></a>
+        <a href="#games" class="bottom-bar-link"><i class="fas fa-gamepad"></i><span
+                data-i18n="nav.games">Games</span></a>
+        <a href="#porting" class="bottom-bar-link"><i class="fas fa-exchange-alt"></i><span
+                data-i18n="nav.porting">Porting</span></a>
+        <a href="#internship" class="bottom-bar-link"><i class="fas fa-graduation-cap"></i><span
+                data-i18n="nav.internship">Internship</span></a>
+        <a href="#about" class="bottom-bar-link"><i class="fas fa-users"></i><span
+                data-i18n="nav.about">About</span></a>
+        <a href="#contact" class="bottom-bar-link"><i class="fas fa-envelope"></i><span
+                data-i18n="nav.contact">Contact</span></a>
     </nav>
 
     <!-- Sağ alt köşe tema butonu kaldırıldı -->
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section id="hero" class="hero">
+        <div class="hero-slider swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide hero-slide" style="background-image: url('SS1.jpg');"></div>
+                <div class="swiper-slide hero-slide" style="background-image: url('SS2.jpg');"></div>
+                <div class="swiper-slide hero-slide" style="background-image: url('SS3.jpg');"></div>
+                <div class="swiper-slide hero-slide" style="background-image: url('SS4.avif');"></div>
+            </div>
+        </div>
+        <div class="hero-overlay"></div>
         <div class="hero-content">
-            <h1 data-i18n="hero.title">Welcome to Dinomore</h1>
-            <p data-i18n="hero.subtitle" style="font-family:'Montserrat',sans-serif;font-weight:400;">Where Gaming Dreams Come True</p>
+            <div class="hero-badge"><i class="fas fa-bolt"></i> <span data-i18n="hero.badge">Yeni Nesil Oyun
+                    Deneyimi</span></div>
+            <h1 class="hero-title">
+                <span class="title-new" data-i18n="hero.title.new">WELCOME</span>
+                <span class="title-gaming" data-i18n="hero.title.gaming">DINOMORE</span>
+                <span class="title-world" data-i18n="hero.title.world"></span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">Where gaming dreams come true.</p>
 
-            <div class="hero-video">
-                <iframe id="heroVideoIframe" class="hero-video-element" src="https://www.youtube.com/embed/-OchRBMDkdo?autoplay=1&mute=1&controls=0&loop=1&playlist=-OchRBMDkdo&modestbranding=1&showinfo=0&playsinline=1&enablejsapi=1" title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-                <div class="video-audio-toggle">
-                    <button id="hero-audio-toggle" class="video-audio-btn" data-state="muted" data-i18n="hero.unmute">Unmute</button>
-                </div>
+            <div class="hero-actions-new">
+                <a href="https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/" target="_blank"
+                    class="btn-play">
+                    <i class="fas fa-play"></i> <span data-i18n="hero.playNow">Şimdi Oyna</span>
+                </a>
+                <a href="#games" class="btn-discover" data-i18n="hero.discover">Oyunları Keşfet</a>
             </div>
 
-            <p class="hero-game-info" data-i18n="hero.gameDescription">Add our latest game Kamikaze Strike FPV Drone to your wishlist to get notified at launch!!</p>
-            <div class="hero-actions">
-                <a class="wishlist-button" href="https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/" target="_blank" rel="noopener noreferrer" data-i18n="hero.wishlist">Add to Wishlist on Steam</a>
-                <a href="#games" class="cta-button" data-i18n="hero.cta">Discover Our Games</a>
+            <div class="hero-dynamic-logos">
+                <img src="kamikazeLogogr.png" alt="Kamikaze Strike" class="dynamic-logo kamikaze-logo">
+                <img src="firecrewLogo.png" alt="Firecrew" class="dynamic-logo firecrew-logo">
+                <img src="voltLogo.png" alt="Volt" class="dynamic-logo volt-logo">
             </div>
+
+
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <h2 data-i18n="about.title">About Us</h2>
-        <div class="about-content">
-            <div class="about-text" style="text-align:center;width:100%;">
-                <p data-i18n="about.description" style="font-family:'Montserrat',sans-serif;font-weight:400;">Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5, Xbox One, Nintendo Switch, and PC platforms. We also provide porting services for previously developed games. With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal Engine game engines.</p>
-            </div>
-        </div>
-    </section>
 
-    <!-- Our Games Section -->
-    <section id="games" class="games">
-        <h2 data-i18n="games.title">Our Games</h2>
-        <div class="games-section-box">
-            <div class="games-group">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.playstation"><img src="psLogo.png" alt="PlayStation Logo" class="platform-logo" /> PlayStation Games</h3>
-                <div class="games-cards-flex">
-                    <div class="game-card" onclick="window.open('https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/', '_blank')" style="cursor: pointer;"><img src="kamikazeLogo.png" alt="Kamikaze Logo" class="game-card-image" /></div>
-                    <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
-                    <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
-                </div>
-                <div style="width:100%;display:flex;justify-content:center;margin-top:12px;">
-                    <span class="coming-soon-animated" data-i18n="games.comingsoon"><img src="dino.png" alt="dino" style="height:3.0em;vertical-align:middle;margin-right:8px;display:inline;"/>Coming Soon<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>
-                </div>
+    <!-- Space Background Wrapper -->
+    <div class="space-wrapper">
+        <div class="starfield"></div>
+        <canvas id="neonStarCanvas"></canvas>
+        <div class="floating-logos">
+            <div class="logo-3d unity" id="unity-3d-1">
+                <img src="unityLogo.png" alt="Unity 3D" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
             </div>
-            <div class="vertical-divider"></div>
-            <div class="games-group">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.nintendo"><img src="nintendoSwitchLogo.png" alt="Nintendo Switch Logo" class="platform-logo" /> Nintendo Switch Games</h3>
-                <div class="games-cards-flex">
-                    <div class="game-card" onclick="window.open('https://www.nintendo.com/us/store/products/voltline-switch/?srsltid=AfmBOop9xZ0IdEvlzRz4X6zLhueSwMBYZw7lUG5OMROtwl1AZdoKVNbD', '_blank')" style="cursor: pointer;"><img src="Logo_Voltline.jpg" alt="Voltline Game" class="game-card-image" /></div>
-                    <div class="game-card" onclick="window.open('https://www.nintendo.com/us/store/products/logiq-boost-switch/', '_blank')" style="cursor: pointer;"><img src="brainLogo.jpg" alt="Brain Logo" class="game-card-image" /></div>
-                    <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
-                </div>
-                <div style="width:100%;display:flex;justify-content:center;margin-top:12px;">
-                    <span class="coming-soon-animated" data-i18n="games.comingsoon"><img src="dino.png" alt="dino" style="height:3.0em;vertical-align:middle;margin-right:8px;display:inline;"/>Coming Soon<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>
-                </div>
+            <div class="logo-3d unity" id="unity-3d-2">
+                <img src="unityLogo.png" alt="Unity 3D" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
             </div>
-        </div>
-        <br><br><br>
-        <div class="games-section-box" style="margin-top: 32px;">
-            <div class="games-group" style="width:100%;">
-                <h3 class="platform-title platform-title-dmsans" data-i18n="games.steam"><img src="steamLogo.png" alt="Steam Logo" class="platform-logo" /> Steam Games</h3>
-                <div class="games-cards-flex">
-                    <div class="game-card" onclick="window.open('https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/', '_blank')" style="cursor: pointer;"><img src="kamikazeLogo.png" alt="Kamikaze Logo" class="game-card-image" /></div>
-                    <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
-                    <div class="game-card placeholder-card"><span class="placeholder-icon"><i class="fas fa-gamepad"></i></span></div>
-                    <!-- 4. ikon kaldırıldı -->
-                </div>
-                <div style="width:100%;display:flex;justify-content:center;margin-top:12px;">
-                    <span class="coming-soon-animated" data-i18n="games.comingsoon"><img src="dino.png" alt="dino" style="height:3.0em;vertical-align:middle;margin-right:8px;display:inline;"/>Coming Soon<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>
-                </div>
+            <div class="logo-3d unity" id="unity-3d-3">
+                <img src="unityLogo.png" alt="Unity 3D" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
+                <img src="unityLogo.png" alt="" class="logo-layer">
             </div>
-        </div>
-        <!-- Oyun motoru logoları -->
-        <div class="engine-logos-bar">
-            <img src="unityLogo.png" alt="Unity Logo" class="engine-logo" />
-            <img src="unrealEngineLogo.png" alt="Unreal Engine Logo" class="engine-logo unreal" />
+
+            <div class="logo-3d unreal" id="unreal-3d-1">
+                <img src="unrealEngineLogo.png" alt="Unreal 3D" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+            </div>
+            <div class="logo-3d unreal" id="unreal-3d-2">
+                <img src="unrealEngineLogo.png" alt="Unreal 3D" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+            </div>
+            <div class="logo-3d unreal" id="unreal-3d-3">
+                <img src="unrealEngineLogo.png" alt="Unreal 3D" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+                <img src="unrealEngineLogo.png" alt="" class="logo-layer">
+            </div>
+
+
         </div>
 
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <h2 data-i18n="contact.title">Contact Us</h2>
-        <div class="contact-container">
-            <form class="contact-form" action="https://formspree.io/f/mldwlnqy" method="POST">
-                <input type="text" name="name" data-i18n-placeholder="contact.name" placeholder="Name" required>
-                <input type="email" name="email" data-i18n-placeholder="contact.email" placeholder="Email" required>
-                <textarea name="message" data-i18n-placeholder="contact.message" placeholder="Message" required></textarea>
-                <button type="submit" data-i18n="contact.submit">Send Message</button>
-            </form>
-            <div class="contact-info">
-                <div class="info-item">
-                    <i class="fas fa-envelope"></i>
-                    <p>contact@dinomoregames.com</p>
-                </div>
-                <div class="info-item">
-                    <i class="fas fa-phone"></i>
-                    <p>+90 (506) 273-66 56</p>
-                </div>
-            </div>
-            <div id="form-message" style="display:none;"></div>
+        <div class="drone-background">
+            <div class="drone-instance drone-1"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-2"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-3"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-4"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-5"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-6"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-7"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-8"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-9"><img src="DronePNG.png" alt=""></div>
+            <div class="drone-instance drone-10"><img src="DronePNG.png" alt=""></div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>    
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="logo.png" alt="Dinomore Logo" style="height: 134px; width: auto; display: block;" />
+        <!-- Our Games Section -->
+        <section id="games" class="games">
+            <h2 data-i18n="games.title">Our Games</h2>
+
+            <div class="games-section-box">
+                <div class="games-group">
+                    <h3 class="platform-title platform-title-dmsans" data-i18n="games.playstation">
+                        <img src="psLogo.png" alt="PlayStation Logo" class="platform-logo" /> PlayStation Games
+                    </h3>
+                    <div class="games-grid-new">
+                        <div class="game-card-new library-item">
+                            <div class="library-header"
+                                style="--bg-img: url('DikeyKapsKamikaze.png'); --bg-pos: center 25%;">
+                                <h3 class="game-card-title" data-i18n="games.kamikaze.title">Kamikaze Strike</h3>
+                                <span class="play-link" data-url="https://store.playstation.com/en-us/concept/10018144"
+                                    data-i18n="games.play">Oyna</span>
+                            </div>
+                            <div class="library-content">
+                                <div class="game-card-img-container">
+                                    <img src="DikeyKapsKamikaze.png" alt="Kamikaze Strike" class="fit-cover">
+                                    <span class="genre-tag tag-action" data-i18n="games.genre.action">AKSİYON</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="games-group">
+                    <h3 class="platform-title platform-title-dmsans" data-i18n="games.nintendo">
+                        <img src="nintendoSwitchLogo.png" alt="Nintendo Switch Logo" class="platform-logo" /> Nintendo
+                        Switch Games
+                    </h3>
+                    <div class="games-grid-new">
+                        <div class="game-card-new library-item">
+                            <div class="library-header" style="--bg-img: url('voltlineLogo.jpg')">
+                                <h3 class="game-card-title" data-i18n="games.voltline.title">Voltline</h3>
+                                <span class="play-link"
+                                    data-url="https://www.nintendo.com/us/store/products/voltline-switch/?srsltid=AfmBOop9xZ0IdEvlzRz4X6zLhueSwMBYZw7lUG5OMROtwl1AZdoKVNbD"
+                                    data-i18n="games.play">Oyna</span>
+                            </div>
+                            <div class="library-content">
+                                <div class="game-card-img-container">
+                                    <img src="voltlineLogo.jpg" alt="Voltline Game" class="fit-cover"
+                                        style="--obj-pos: top;" />
+                                    <span class="genre-tag tag-puzzle" data-i18n="games.genre.puzzle">Bulmaca</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="game-card-new library-item">
+                            <div class="library-header" style="--bg-img: url('brainLogo.jpg')">
+                                <h3 class="game-card-title" data-i18n="games.logiq.title">Logiq Boost</h3>
+                                <span class="play-link"
+                                    data-url="https://www.nintendo.com/us/store/products/logiq-boost-switch/"
+                                    data-i18n="games.play">Oyna</span>
+                            </div>
+                            <div class="library-content">
+                                <div class="game-card-img-container">
+                                    <img src="brainLogo.jpg" alt="Brain Logo" class="fit-cover" />
+                                    <span class="genre-tag tag-puzzle" data-i18n="games.genre.puzzle">Bulmaca</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="games-group">
+                    <h3 class="platform-title platform-title-dmsans" data-i18n="games.steam">
+                        <img src="steamLogo.png" alt="Steam Logo" class="platform-logo" /> Steam Games
+                    </h3>
+                    <div class="games-grid-new">
+                        <div class="game-card-new library-item">
+                            <div class="library-header"
+                                style="--bg-img: url('DikeyKapsKamikaze.png'); --bg-pos: center 25%;">
+                                <h3 class="game-card-title" data-i18n="games.kamikaze.title">Kamikaze Strike</h3>
+                                <span class="play-link"
+                                    data-url="https://store.steampowered.com/app/3902740/Kamikaze_Strike_FPV_Drone/"
+                                    data-i18n="games.play">Oyna</span>
+                            </div>
+                            <div class="library-content">
+                                <div class="game-card-img-container">
+                                    <img src="DikeyKapsKamikaze.png" alt="Kamikaze Strike" class="fit-cover">
+                                    <span class="genre-tag tag-action" data-i18n="games.genre.action">AKSİYON</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
-            <div class="social-links" aria-label="Social media links">
-                <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://www.tiktok.com/@dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-                    <i class="fab fa-tiktok"></i>
-                </a>
-                <a href="https://www.linkedin.com/company/dinomoregames" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://discord.gg/AhvAHWSaSX" target="_blank" rel="noopener noreferrer" aria-label="Discord">
-                    <i class="fab fa-discord"></i>
-                </a>
+        </section>
+
+        <!-- Porting Section -->
+        <section id="porting" class="porting">
+            <div class="porting-container">
+                <div class="porting-header fade-in">
+                    <h2 data-i18n="porting.title">PORTING</h2>
+                    <p class="porting-intro" data-i18n="porting.intro">Oyununuz Tek Platformla Sınırlı Kalmasın</p>
+                    <p class="porting-description" data-i18n="porting.description">Bir oyunu geliştirmek başlı başına
+                        zorlu bir süreç. Ancak oyunu farklı platformlara — PC’den konsola, mobil’den farklı işletim
+                        sistemlerine — taşımak apayrı bir uzmanlık gerektirir. Performans optimizasyonu, kontrol
+                        mekaniklerinin uyarlanması, çözünürlük ve arayüz düzenlemeleri gibi pek çok teknik detay
+                        profesyonel yaklaşım ister.</p>
+                    <div class="porting-quote fade-in">
+                        <p data-i18n="porting.quote">Dinomore Games, tam da bu alanda sunduğu çözümlerle geliştiricilere
+                            güçlü bir destek sağlıyor.</p>
+                    </div>
+                </div>
+
+                <div class="porting-grid">
+                    <div class="porting-card fade-in">
+                        <div class="card-icon"><i class="fas fa-rocket"></i></div>
+                        <h3 data-i18n="porting.why.title">Neden Oyun Portlama Bu Kadar Önemli?</h3>
+                        <ul class="porting-list">
+                            <li data-i18n="porting.why.item1">Daha geniş oyuncu kitlesi</li>
+                            <li data-i18n="porting.why.item2">Artan gelir potansiyeli</li>
+                            <li data-i18n="porting.why.item3">Marka bilinirliğinde büyüme</li>
+                            <li data-i18n="porting.why.item4">Platform bağımsız sürdürülebilirlik</li>
+                        </ul>
+                    </div>
+
+                    <div class="porting-card fade-in">
+                        <div class="card-icon"><i class="fas fa-tools"></i></div>
+                        <h3 data-i18n="porting.approach.title">Dinomore Games’in Portlama Yaklaşımı</h3>
+                        <div class="approach-items">
+                            <div class="approach-item">
+                                <div class="approach-content">
+                                    <strong data-i18n="porting.approach.item1.title">Teknik Uzmanlık</strong>
+                                    <p data-i18n="porting.approach.item1.desc">Farklı oyun motorları ve platform
+                                        mimarileri
+                                        konusunda deneyimli ekip.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="porting-footer fade-in">
+                    <div class="who-box">
+                        <div class="card-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3 data-i18n="porting.who.title">Kimler İçin Uygun?</h3>
+                        <ul class="tag-list">
+                            <li data-i18n="porting.who.item1">Indie geliştiriciler</li>
+                            <li data-i18n="porting.who.item2">Stüdyosunu büyütmek isteyen ekipler</li>
+                            <li data-i18n="porting.who.item3">Mevcut oyununu yeni platformlara açmak isteyen yayıncılar
+                            </li>
+                            <li data-i18n="porting.who.item4">Global pazara açılmayı hedefleyen projeler</li>
+                        </ul>
+                    </div>
+
+                    <div class="global-box">
+                        <div class="card-icon"><i class="fas fa-globe"></i></div>
+                        <h3 data-i18n="porting.global.title">Global Pazara Açılan Kapı</h3>
+                        <p data-i18n="porting.global.desc">Başarılı bir port, oyununuzu sadece teknik olarak değil,
+                            ticari olarak da bir üst seviyeye taşır. Dinomore Games, projeye sadece bir “taşıma işlemi”
+                            olarak değil, stratejik bir büyüme hamlesi olarak yaklaşıyor.</p>
+                    </div>
+
+                    <div class="cta-box">
+                        <p data-i18n="porting.cta">Eğer siz de oyununuzu farklı platformlarda görmek, daha fazla
+                            oyuncuya ulaşmak ve gelir potansiyelinizi artırmak istiyorsanız, Dinomore Games’in oyun
+                            portlama hizmetleri güçlü bir çözüm ortağı olabilir.</p>
+                    </div>
+                </div>
             </div>
-            <p data-i18n="footer.copyright">&copy; 2025 Dinomore. All rights reserved.</p>
-        </div>
-    </footer>
+        </section>
+
+        <!-- Internship Section -->
+        <section id="internship" class="internship">
+            <div class="internship-container">
+                <div class="internship-left">
+                    <h2 data-i18n="internship.title">Internship Program</h2>
+                    <p class="internship-subtitle" data-i18n="internship.subtitle">Join our team and kickstart your
+                        career in game development. Here's how our internship process works:</p>
+
+                    <div class="internship-phases">
+                        <div class="phase-item" data-phase="1">
+                            <div class="phase-indicator">
+                                <div class="phase-dot"></div>
+                                <div class="phase-line"></div>
+                            </div>
+                            <div class="phase-content">
+                                <h3 data-i18n="internship.phase1.title">Step 1: Application</h3>
+                                <p data-i18n="internship.phase1.desc">Ekibimiz ile iletişim kısmında bulunan mail
+                                    sistemi yoluyla görüşebilir, CV ve portföyünüzü gönderebilirsiniz.</p>
+                            </div>
+                        </div>
+
+                        <div class="phase-item" data-phase="2">
+                            <div class="phase-indicator">
+                                <div class="phase-dot"></div>
+                                <div class="phase-line"></div>
+                            </div>
+                            <div class="phase-content">
+                                <h3 data-i18n="internship.phase2.title">Step 2: Technical Assessment</h3>
+                                <p data-i18n="internship.phase2.desc">A hands-on opportunity to shine! You'll work on a
+                                    task tailored to your role, allowing us to see your creativity and problem-solving
+                                    in action.</p>
+                            </div>
+                        </div>
+
+                        <div class="phase-item" data-phase="3">
+                            <div class="phase-indicator">
+                                <div class="phase-dot"></div>
+                                <div class="phase-line"></div>
+                            </div>
+                            <div class="phase-content">
+                                <h3 data-i18n="internship.phase3.title">Step 3: Interview</h3>
+                                <p data-i18n="internship.phase3.desc">Let's dive deeper! This is your chance to present
+                                    your work, ask questions, and discuss your ideas with our team.</p>
+                            </div>
+                        </div>
+
+                        <div class="phase-item" data-phase="4">
+                            <div class="phase-indicator">
+                                <div class="phase-dot"></div>
+                            </div>
+                            <div class="phase-content">
+                                <h3 data-i18n="internship.phase4.title">Step 4: Onboarding</h3>
+                                <p data-i18n="internship.phase4.desc">Welcome aboard! You'll join your team, get set up
+                                    with tools, and start contributing to real projects from day one.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="internship-right">
+                    <div class="internship-image-wrapper">
+                        <img src="dino.png" alt="Internship at Dinomore" class="internship-image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 data-i18n="about.title">About Us</h2>
+                    <p data-i18n="about.description" style="font-family:'Montserrat',sans-serif;font-weight:400;">
+                        Established in June 2025. Dinomore Games develops games for PlayStation 4, PlayStation 5, Xbox
+                        One,
+                        Nintendo Switch, and PC platforms. We also provide porting services for previously developed
+                        games.
+                        With a young and dynamic team, Dinomore Games additionally creates content for Unity and Unreal
+                        Engine game engines.</p>
+                </div>
+                <div class="about-image">
+                    <img src="odtuLogo.png" alt="ODTÜ Logo">
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="contact-container">
+                <h2 data-i18n="contact.title">Contact Us</h2>
+                <form class="contact-form" action="https://formspree.io/f/mldwlnqy" method="POST">
+                    <input type="text" name="name" data-i18n-placeholder="contact.name" placeholder="Name" required>
+                    <input type="email" name="email" data-i18n-placeholder="contact.email" placeholder="Email" required>
+                    <textarea name="message" data-i18n-placeholder="contact.message" placeholder="Message"
+                        required></textarea>
+                    <button type="submit" data-i18n="contact.submit">Send Message</button>
+                </form>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <p>contact@dinomoregames.com</p>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <p>+90 (506) 273-66 56</p>
+                    </div>
+                </div>
+                <div id="form-message" style="display:none;"></div>
+            </div>
+            <!-- Footer -->
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <img src="logo.png" alt="Dinomore Logo" style="height: 134px; width: auto; display: block;" />
+                    </div>
+
+                    <div class="social-links footer-social-links" aria-label="Social media links">
+                        <a href="https://instagram.com/dinomoregames" target="_blank" rel="noopener noreferrer"
+                            aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@kamikazestrikefpvdrone" target="_blank"
+                            rel="noopener noreferrer" aria-label="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@DinomoreGames" target="_blank" rel="noopener noreferrer"
+                            aria-label="YouTube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                        <a href="https://www.reddit.com/user/dinomoregames/" target="_blank" rel="noopener noreferrer"
+                            aria-label="Reddit">
+                            <i class="fa-brands fa-reddit"></i>
+                        </a>
+                        <a href="https://x.com/dinomoregames" target="_blank" rel="noopener noreferrer"
+                            aria-label="X (Twitter)">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/dinomore-games/" target="_blank"
+                            rel="noopener noreferrer" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://discord.gg/AhvAHWSaSX" target="_blank" rel="noopener noreferrer"
+                            aria-label="Discord">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+
+                    <p data-i18n="footer.copyright">&copy; 2026 Dinomore. All rights reserved.</p>
+                </div>
+            </footer>
+    </div>
 
     <!-- Scroll to Top Button kaldırıldı -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
-</html> 
+
+</html>
