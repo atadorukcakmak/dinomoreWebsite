@@ -557,6 +557,27 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) { }
   }
   applyScrollMarginTop();
+
+  // === Visitor Country Tracking ===
+  if (!sessionStorage.getItem('dino_tracked')) {
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.country_code) {
+          const visits = JSON.parse(localStorage.getItem('dino_visits') || '[]');
+          visits.push({
+            country: data.country_code,
+            countryName: data.country_name,
+            city: data.city || '',
+            ts: Date.now()
+          });
+          localStorage.setItem('dino_visits', JSON.stringify(visits));
+          sessionStorage.setItem('dino_tracked', '1');
+        }
+      })
+      .catch(() => { /* silently fail */ });
+  }
+
   // Load YouTube Iframe API
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
