@@ -698,6 +698,11 @@ body.light-mode .contact-form button:hover {
     /* Aligned with text above */
 }
 
+.roll-logo {
+    max-height: 140px;
+    margin-left: 0;
+}
+
 @keyframes simpleElectronic {
     0% {
         opacity: 0;
@@ -2584,6 +2589,10 @@ section.contact {
     background: rgba(20, 20, 20, 0.9);
     border-color: rgba(255, 255, 255, 0.2);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.library-item.expanded .game-card-img-container img {
+    cursor: pointer;
 }
 
 .game-card-img-container {

@@ -28,7 +28,6 @@ const ADMIN_TRANSLATIONS = {
         "stat.bounces": "Bounces",
         "chart.trend": "Traffic Trend",
         "chart.sources": "Sources",
-        "chart.heatmap": "Visitor Heatmap",
         "chart.insights": "AI Insights",
         "chart.devices": "Devices",
         "chart.hourly": "Hourly Density",
@@ -66,7 +65,20 @@ const ADMIN_TRANSLATIONS = {
         "settings.admin.btn": "Create Profile",
         "settings.utils.title": "System Utilities",
         "settings.utils.subtitle": "Developer tools and data simulation.",
-        "settings.utils.clear": "Clear Data"
+        "settings.utils.clear": "Clear Data",
+        "audience.browsers": "Browser Distribution",
+        "audience.returning": "New vs Returning",
+        "audience.cities": "Top Cities",
+        "campaign.sources": "Campaign Sources",
+        "campaign.mediums": "Campaign Mediums",
+        "campaign.performance": "Campaign Performance",
+        "table.browser": "Browser",
+        "table.city": "City",
+        "table.status": "Status",
+        "table.medium": "Medium",
+        "table.campaign": "Campaign",
+        "table.top_pages": "Top Pages",
+        "table.path": "Page Path"
     },
     tr: {
         "nav.overview": "Genel Bakış",
@@ -83,7 +95,6 @@ const ADMIN_TRANSLATIONS = {
         "stat.bounces": "Hemen Çıkma",
         "chart.trend": "Trafik Trendi",
         "chart.sources": "Kaynaklar",
-        "chart.heatmap": "Ziyaretçi Isı Haritası",
         "chart.insights": "AI İçgörüleri",
         "chart.devices": "Cihazlar",
         "chart.hourly": "Saatlik Yoğunluk",
@@ -106,10 +117,10 @@ const ADMIN_TRANSLATIONS = {
         "insight.spike": "Trafik artışı tespit edildi!",
         "audience.title": "Kitle Analitiği",
         "audience.subtitle": "Ziyaretçi demografisi ve davranış kalıplarının ayrıntılı dökümü.",
-        "audience.status": "Kitle modülü senkronize ediliyor...",
+        "audience.status": "Kitle modülü senkronize edildi.",
         "campaigns.title": "Pazarlama Kampanyaları",
         "campaigns.subtitle": "Aktif pazarlama kanallarınızın ve UTM parametrelerinizin performansını izleyin.",
-        "campaigns.status": "Kampanya takibi başlatılıyor...",
+        "campaigns.status": "Kampanya takibi aktif.",
         "settings.security.title": "Hesap Güvenliği",
         "settings.security.subtitle": "Yönetici şifrenizi güncelleyin.",
         "settings.security.label": "Yeni Şifre",
@@ -121,12 +132,26 @@ const ADMIN_TRANSLATIONS = {
         "settings.admin.btn": "Profil Oluştur",
         "settings.utils.title": "Sistem Araçları",
         "settings.utils.subtitle": "Geliştirici araçları ve veri simülasyonu.",
-        "settings.utils.clear": "Verileri Temizle"
+        "settings.utils.clear": "Verileri Temizle",
+        "audience.browsers": "Tarayıcı Dağılımı",
+        "audience.returning": "Yeni vs Geri Gelen",
+        "audience.cities": "En Popüler Şehirler",
+        "campaign.sources": "Kampanya Kaynakları",
+        "campaign.mediums": "Kampanya Kanalları",
+        "campaign.performance": "Kampanya Performansı",
+        "table.browser": "Tarayıcı",
+        "table.city": "Şehir",
+        "table.status": "Durum",
+        "table.medium": "Kanal",
+        "table.campaign": "Kampanya",
+        "table.path": "Sayfa Yolu",
+        "table.top_pages": "Popüler Sayfalar"
     }
 };
 
 let currentLang = localStorage.getItem('dino_admin_lang') || 'en';
 
+window.changeLanguage = changeLanguage;
 function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('dino_admin_lang', lang);
@@ -141,12 +166,17 @@ function setRange(range, el) {
     updateDashboard();
 }
 
+window.switchSection = switchSection;
 function switchSection(sectionId) {
-    // Update Sidebar
-    document.querySelectorAll('.nav-item').forEach(item => {
+    // Update Navigation (Sidebar & Mobile)
+    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
         item.classList.remove('active');
     });
+    
+    // Activate sidebar item
     document.getElementById(`nav-${sectionId}`)?.classList.add('active');
+    // Activate mobile nav item
+    document.querySelector(`.mobile-nav-item.nav-${sectionId}`)?.classList.add('active');
 
     // Update Content
     document.querySelectorAll('.dash-section').forEach(section => {
@@ -331,20 +361,89 @@ function initCharts() {
             }
         });
     }
+
+    // 5. Browser Distribution (Pie)
+    const ctxBrowsers = document.getElementById('browsersChart')?.getContext('2d');
+    if (ctxBrowsers) {
+        charts.browsers = new Chart(ctxBrowsers, {
+            type: 'pie',
+            data: { labels: ['Chrome', 'Safari', 'Firefox', 'Edge', 'Other'], datasets: [{
+                data: [],
+                backgroundColor: ['#00f2ff', '#ff2d95', '#7d2ae8', '#3a00ff', '#28c864'],
+                borderWidth: 0
+            }]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: 'rgba(255,255,255,0.7)' } } }
+            }
+        });
+    }
+
+    // 6. New vs Returning (Doughnut)
+    const ctxVisitorStatus = document.getElementById('visitorStatusChart')?.getContext('2d');
+    if (ctxVisitorStatus) {
+        charts.visitorStatus = new Chart(ctxVisitorStatus, {
+            type: 'doughnut',
+            data: { labels: currentLang === 'tr' ? ['Yeni', 'Geri Gelen'] : ['New', 'Returning'], datasets: [{
+                data: [],
+                backgroundColor: ['#00f2ff', '#7d2ae8'],
+                borderWidth: 0
+            }]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, color: 'rgba(255,255,255,0.7)' } } }
+            }
+        });
+    }
+
+    // 7. Campaign Sources (Bar)
+    const ctxCampSources = document.getElementById('campSourcesChart')?.getContext('2d');
+    if (ctxCampSources) {
+        charts.campSources = new Chart(ctxCampSources, {
+            type: 'bar',
+            data: { labels: [], datasets: [{
+                data: [],
+                backgroundColor: '#7d2ae8',
+                borderRadius: 8
+            }]},
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { grid: { display: false } } }
+            }
+        });
+    }
 }
 
-function updateDashboard() {
+window.updateDashboard = function() {
+    try {
+        refreshDashboardData();
+    } catch (err) {
+        console.error('Update Dashboard Error:', err);
+    }
+};
+
+function refreshDashboardData() {
     const range = document.querySelector('.range-tab.active')?.dataset.range || '7';
     const visits = filterVisits(getVisits(), range);
     
-    document.getElementById('totalVisits').textContent = visits.length.toLocaleString();
+    const elTotal = document.getElementById('totalVisits');
+    if (elTotal) elTotal.textContent = visits.length.toLocaleString();
+    
     const totalDuration = visits.reduce((s, v) => s + (v.duration || 60), 0);
     const avgDur = visits.length ? Math.floor(totalDuration / visits.length) : 0;
-    document.getElementById('avgDuration').textContent = `${Math.floor(avgDur / 60)}m ${avgDur % 60}s`;
+    const elAvg = document.getElementById('avgDuration');
+    if (elAvg) elAvg.textContent = `${Math.floor(avgDur / 60)}m ${avgDur % 60}s`;
     
     const now = Date.now();
-    const activeUsers = visits.filter(v => now - v.ts < 300000).length;
-    document.getElementById('todayVisits').textContent = activeUsers.toLocaleString();
+    const activeUsers = visits.filter(v => now - (v.ts || 0) < 300000).length;
+    const elActive = document.getElementById('todayVisits');
+    if (elActive) elActive.textContent = activeUsers.toLocaleString();
 
     if (charts.traffic) {
         const days = range === 'all' ? 30 : parseInt(range);
@@ -375,7 +474,7 @@ function updateDashboard() {
         charts.sources.data.labels = getSources();
         const sourceCounts = getSources().map(s => {
              const enSource = SOURCES_MAP.en[getSources().indexOf(s)];
-             return visits.filter(v => v.source.toLowerCase().includes(enSource.toLowerCase())).length;
+             return visits.filter(v => (v.source || '').toLowerCase().includes(enSource.toLowerCase())).length;
         });
         charts.sources.data.datasets[0].data = sourceCounts;
         charts.sources.update();
@@ -385,7 +484,7 @@ function updateDashboard() {
         charts.devices.data.labels = getDevices();
         const deviceCounts = getDevices().map(d => {
             const enDevice = DEVICES_MAP.en[getDevices().indexOf(d)];
-            return visits.filter(v => v.device === enDevice).length;
+            return visits.filter(v => (v.device || '') === enDevice).length;
         });
         charts.devices.data.datasets[0].data = deviceCounts;
         charts.devices.update();
@@ -402,8 +501,93 @@ function updateDashboard() {
     }
 
     renderTable(visits);
-    renderMap(visits);
     renderInsights(visits);
+    renderTopPages(visits);
+    renderAudienceData(visits);
+    renderCampaignData(visits);
+}
+
+function renderTopPages(visits) {
+    const pages = {};
+    visits.forEach(v => { const p = v.path || '/'; pages[p] = (pages[p] || 0) + 1; });
+    const sorted = Object.entries(pages).sort((a,b) => b[1] - a[1]).slice(0, 10);
+    const tbody = document.getElementById('pagesTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = sorted.map(([path, count], i) => `
+        <tr>
+            <td style="font-family:monospace; font-size:0.75rem;">${path}</td>
+            <td class="visit-count">${count.toLocaleString()}</td>
+        </tr>
+    `).join('');
+}
+
+function renderAudienceData(visits) {
+    if (charts.browsers) {
+        const browsers = ['Chrome', 'Safari', 'Firefox', 'Edge', 'Other'];
+        charts.browsers.data.datasets[0].data = browsers.map(b => visits.filter(v => (v.browser || '') === b).length);
+        charts.browsers.update();
+    }
+    if (charts.visitorStatus) {
+        charts.visitorStatus.data.labels = currentLang === 'tr' ? ['Yeni', 'Geri Gelen'] : ['New', 'Returning'];
+        charts.visitorStatus.data.datasets[0].data = [
+            visits.filter(v => (v.visitorStatus || '') === 'New').length,
+            visits.filter(v => (v.visitorStatus || '') === 'Returning').length
+        ];
+        charts.visitorStatus.update();
+    }
+    
+    // Top Cities Table
+    const cityCounts = {};
+    visits.forEach(v => { if(v.city && v.city !== 'Unknown') cityCounts[v.city] = (cityCounts[v.city] || 0) + 1; });
+    const sortedCities = Object.entries(cityCounts).sort((a,b) => b[1] - a[1]).slice(0, 8);
+    const tbody = document.getElementById('cityTableBody');
+    if (tbody) {
+        tbody.innerHTML = sortedCities.map(([city, count], i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${city}</td>
+                <td class="visit-count">${count.toLocaleString()}</td>
+                <td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${(count / visits.length * 100).toFixed(1)}%"></div></div></td>
+            </tr>
+        `).join('') || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:40px;">No city data available</td></tr>`;
+    }
+}
+
+function renderCampaignData(visits) {
+    const campaignVisits = visits.filter(v => (v.source || '').toLowerCase().includes('ads /'));
+    
+    // Campaign Performance Table
+    const campPerformance = {};
+    campaignVisits.forEach(v => {
+        const key = `${v.source || ''} | ${v.medium || ''} | ${v.campaign || ''}`;
+        if (!campPerformance[key]) campPerformance[key] = { count: 0, dur: 0, s: (v.source || ''), m: (v.medium || ''), c: (v.campaign || '') };
+        campPerformance[key].count++;
+        campPerformance[key].dur += (v.duration || 60);
+    });
+    
+    const sortedCamps = Object.values(campPerformance).sort((a,b) => b.count - a.count);
+    const tbody = document.getElementById('campaignTableBody');
+    if (tbody) {
+        tbody.innerHTML = sortedCamps.map((c, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td style="font-weight:600; color:var(--accent);">${c.s.replace('Ads / ', '')}</td>
+                <td><span style="opacity:0.7;">${c.m}</span></td>
+                <td><span style="font-size:0.8rem;">${c.c}</span></td>
+                <td class="visit-count">${c.count}</td>
+                <td>${Math.floor(c.dur / c.count / 60)}m ${Math.floor((c.dur / c.count) % 60)}s</td>
+            </tr>
+        `).join('') || `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:40px;">No active campaigns detected</td></tr>`;
+    }
+
+    if (charts.campSources) {
+        const sources = {};
+        campaignVisits.forEach(v => { const s = (v.source || '').replace('Ads / ', ''); sources[s] = (sources[s] || 0) + 1; });
+        const sorted = Object.entries(sources).sort((a,b) => b[1] - a[1]);
+        charts.campSources.data.labels = sorted.map(s => s[0]);
+        charts.campSources.data.datasets[0].data = sorted.map(s => s[1]);
+        charts.campSources.update();
+    }
 }
 
 function aggregateByDay(visits, numDays) {
@@ -466,7 +650,7 @@ function renderInsights(visits) {
     }
 
     // Devices Insight
-    const mobileVisits = visits.filter(v => v.device === 'Mobile').length;
+    const mobileVisits = visits.filter(v => (v.device || '') === 'Mobile').length;
     const mobilePct = (mobileVisits / visits.length) * 100;
     if (mobilePct > 50) {
         insights.push({ icon: 'fa-mobile-alt', text: ADMIN_TRANSLATIONS[currentLang]["insight.mobile"], color: '#00f2ff' });
@@ -498,6 +682,42 @@ function renderInsights(visits) {
         });
     }
 
+    // Returning Visitor Insight (NEW)
+    const returning = visits.filter(v => (v.visitorStatus || '') === 'Returning').length;
+    const returnPct = (returning / visits.length) * 100;
+    if (returnPct > 35) {
+        insights.push({ 
+            icon: 'fa-heart', 
+            text: currentLang === 'tr' ? `Sadık kitle! Kullanıcıların <strong>%${returnPct.toFixed(0)}</strong>'i geri dönüyor.` : `Loyal audience! <strong>${returnPct.toFixed(0)}%</strong> of users are returning.`, 
+            color: '#ff2d95' 
+        });
+    }
+
+    // Campaign Efficiency (NEW)
+    const campaignVisits = visits.filter(v => (v.source || '').toLowerCase().includes('ads /'));
+    if (campaignVisits.length > 0) {
+        const adDur = campaignVisits.reduce((s, v) => s + (v.duration || 60), 0) / campaignVisits.length;
+        if (adDur > avgDuration) {
+            insights.push({ 
+                icon: 'fa-money-bill-wave', 
+                text: currentLang === 'tr' ? 'Kampanya trafiği yüksek etkileşimli!' : 'Campaign traffic is highly engaged!', 
+                color: '#00ff88' 
+            });
+        }
+    }
+
+    // Top Region Insight (NEW)
+    const countries = {};
+    visits.forEach(v => countries[v.country] = (countries[v.country] || 0) + 1);
+    const topCountry = Object.entries(countries).sort((a,b) => b[1] - a[1])[0];
+    if (topCountry) {
+        insights.push({ 
+            icon: 'fa-map-marker-alt', 
+            text: currentLang === 'tr' ? `En aktif bölge: <strong>${topCountry[0]}</strong>` : `Top region: <strong>${topCountry[0]}</strong>`, 
+            color: '#00ccff' 
+        });
+    }
+
     container.innerHTML = insights.map(ins => `
         <div class="insight-item" style="border-left: 3px solid ${ins.color}; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.85rem; display:flex; align-items:center; gap:12px; animation: fadeIn 0.3s ease;">
             <i class="fas ${ins.icon}" style="color: ${ins.color}; font-size: 1rem; width: 20px; text-align: center;"></i>
@@ -506,106 +726,66 @@ function renderInsights(visits) {
     `).join('');
 }
 
-function renderMap(visits) {
-    const container = document.getElementById('mapContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    const width = container.offsetWidth;
-    const height = 350;
-    const svg = d3.select(container).append('svg').attr('width', '100%').attr('height', height).attr('viewBox', `0 0 ${width} ${height}`).style('overflow', 'visible');
-    const projection = d3.geoMercator().scale(width / 6.5).translate([width / 2, height / 1.5]);
-    const path = d3.geoPath().projection(projection);
-    const countryCounts = {};
-    visits.forEach(v => { countryCounts[v.country] = (countryCounts[v.country] || 0) + 1; });
-    const maxVisits = Math.max(...Object.values(countryCounts), 1);
-
-    d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson').then(data => {
-        svg.append('g').selectAll('path').data(data.features).enter().append('path').attr('d', path).attr('fill', d => {
-            const count = countryCounts[d.id] || 0;
-            if (count === 0) return 'rgba(255,255,255,0.03)';
-            const opacity = 0.2 + (count / maxVisits) * 0.8;
-            return `rgba(0, 242, 255, ${opacity})`;
-        }).attr('stroke', 'rgba(0, 242, 255, 0.1)').attr('stroke-width', 0.5).on('mouseover', function(event, d) {
-            const count = countryCounts[d.id] || 0;
-            d3.select(this).attr('stroke', '#00f2ff').attr('stroke-width', 1);
-            showTooltip(event, `<strong>${d.properties.name}</strong>: ${count} visits`);
-        }).on('mouseout', function() {
-            d3.select(this).attr('stroke', 'rgba(0, 242, 255, 0.1)').attr('stroke-width', 0.5);
-            hideTooltip();
+window.generateDemoData = function() {
+    const countries = ['TR', 'US', 'DE', 'GB', 'AZ', 'FR', 'NL'];
+    const cities = { TR: ['Istanbul', 'Ankara', 'Izmir'], US: ['New York', 'London', 'Berlin'], DE: ['Berlin', 'Munich'], GB: ['London', 'Manchester'], AZ: ['Baku'], FR: ['Paris'], NL: ['Amsterdam'] };
+    const enSources = [...SOURCES_MAP.en, 'Ads / Google', 'Ads / Facebook', 'Ads / Twitter'];
+    const enDevices = DEVICES_MAP.en;
+    const browsers = ['Chrome', 'Safari', 'Firefox', 'Edge'];
+    const mediums = ['cpc', 'social', 'email', 'display'];
+    const campaigns = ['spring_sale', 'new_year_2026', 'brand_awareness', 'remarketing'];
+    const paths = ['/', '/contact', '/products', '/about', '/blog/latest-news', '/services/web-design'];
+    
+    const newVisits = [];
+    for(let i=0; i<400; i++) {
+        const country = countries[Math.floor(Math.random() * countries.length)];
+        const source = enSources[Math.floor(Math.random() * enSources.length)];
+        const isAd = source.includes('Ads /');
+        
+        newVisits.push({
+            sessionId: Math.random().toString(36).substring(2,15),
+            ts: Date.now() - Math.floor(Math.random() * 30 * 86400000),
+            country: country,
+            city: cities[country] ? cities[country][Math.floor(Math.random() * cities[country].length)] : 'Unknown',
+            device: enDevices[Math.floor(Math.random() * enDevices.length)],
+            browser: browsers[Math.floor(Math.random() * browsers.length)],
+            visitorStatus: Math.random() > 0.4 ? 'Returning' : 'New',
+            source: source,
+            medium: isAd ? mediums[Math.floor(Math.random() * mediums.length)] : 'none',
+            campaign: isAd ? campaigns[Math.floor(Math.random() * campaigns.length)] : 'none',
+            path: paths[Math.floor(Math.random() * paths.length)],
+            duration: Math.floor(Math.random() * 600)
         });
-    });
-}
-
-function showTooltip(event, html) {
-    const tt = document.getElementById('mapTooltip');
-    if (!tt) return;
-    tt.innerHTML = html;
-    tt.style.display = 'block';
-    tt.style.left = (event.pageX + 10) + 'px';
-    tt.style.top = (event.pageY + 10) + 'px';
-}
-
-function hideTooltip() {
-    const tt = document.getElementById('mapTooltip');
-    if (tt) tt.style.display = 'none';
-}
-
-function exportToCsv() {
-    const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
-    const visits = filterVisits(getVisits(), range);
-    if (!visits.length) return alert('No data to export!');
-    let csv = 'Timestamp,Country,Source,Device,Duration(s)\n';
-    visits.forEach(v => { csv += `"${new Date(v.ts).toISOString()}","${v.country}","${v.source}","${v.device}","${v.duration}"\n`; });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `dinomore_analytics_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+    }
+    const existing = JSON.parse(localStorage.getItem('dino_visits') || '[]');
+    localStorage.setItem('dino_visits', JSON.stringify([...existing, ...newVisits]));
+    if (window.updateDashboard) window.updateDashboard();
+};
 
 function init() {
     console.log('Initializing Dinomore Admin Engine...');
-    updateContent();
-    initCharts();
-    updateDashboard();
+    try {
+        updateContent();
+        initCharts();
+        refreshDashboardData();
 
-    document.getElementById('addDemoBtn')?.addEventListener('click', () => {
-        const countries = ['TR', 'US', 'DE', 'GB', 'AZ', 'FR', 'NL'];
-        const enSources = SOURCES_MAP.en;
-        const enDevices = DEVICES_MAP.en;
-        const newVisits = [];
-        for(let i=0; i<300; i++) {
-            newVisits.push({
-                sessionId: Math.random().toString(36).substring(2,15),
-                ts: Date.now() - Math.floor(Math.random() * 30 * 86400000),
-                country: countries[Math.floor(Math.random() * countries.length)],
-                device: enDevices[Math.floor(Math.random() * enDevices.length)],
-                source: enSources[Math.floor(Math.random() * enSources.length)],
-                duration: Math.floor(Math.random() * 300)
-            });
-        }
-        const existing = getVisits();
-        localStorage.setItem('dino_visits', JSON.stringify([...existing, ...newVisits]));
-        updateDashboard();
-    });
+        // Print Preparation
+        window.onbeforeprint = () => {
+            const dateEl = document.getElementById('print-date');
+            if (dateEl) {
+                dateEl.textContent = new Date().toLocaleString(currentLang === 'tr' ? 'tr-TR' : 'en-US', {
+                    dateStyle: 'long',
+                    timeStyle: 'short'
+                });
+            }
+            // Ensure all charts are rendered for print
+            Object.values(charts).forEach(c => c.resize());
+        };
 
-    document.getElementById('exportCsvBtn')?.addEventListener('click', exportToCsv);
-
-    // Print Preparation
-    window.onbeforeprint = () => {
-        const dateEl = document.getElementById('print-date');
-        if (dateEl) {
-            dateEl.textContent = new Date().toLocaleString(currentLang === 'tr' ? 'tr-TR' : 'en-US', {
-                dateStyle: 'long',
-                timeStyle: 'short'
-            });
-        }
-        // Ensure all charts are rendered for print
-        Object.values(charts).forEach(c => c.resize());
-    };
+        window.adminEngineReady = true;
+    } catch (err) {
+        console.error('Initialization Error:', err);
+    }
 }
 
 if (document.readyState === 'loading') {

@@ -24,7 +24,7 @@
         return;
     }
 
-    // 2. Device Detection
+    // 2. Device & Browser Detection
     function getDeviceType() {
         const ua = navigator.userAgent;
         if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return 'Tablet';
@@ -32,25 +32,65 @@
         return 'Desktop';
     }
 
-    // 3. Traffic Source Detection
-    function getSource() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('utm_source')) return 'Ads / ' + urlParams.get('utm_source');
-        
-        const referrer = document.referrer;
-        if (!referrer) return 'Direct';
-
-        const refUrl = new URL(referrer);
-        const host = refUrl.hostname.toLowerCase();
-
-        if (host.includes('google') || host.includes('bing') || host.includes('yahoo')) return 'Organic Search';
-        if (host.includes('facebook') || host.includes('instagram') || host.includes('t.co') || host.includes('linkedin') || host.includes('reddit') || host.includes('tiktok')) return 'Social Media';
-        if (host.includes(window.location.hostname)) return 'Internal';
-
-        return 'Referral (' + host + ')';
+    function getBrowserInfo() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
+        if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Edg')) return 'Edge';
+        return 'Other';
     }
 
-    // 4. Session Tracking
+    // 3. Traffic Source Detection (Enhanced)
+    function getSourceDetails() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmSource = urlParams.get('utm_source');
+        const utmMedium = urlParams.get('utm_medium');
+        const utmCampaign = urlParams.get('utm_campaign');
+
+        if (utmSource) {
+            return {
+                source: 'Ads / ' + utmSource,
+                medium: utmMedium || 'cpc',
+                campaign: utmCampaign || 'unspecified'
+            };
+        }
+        
+        const referrer = document.referrer;
+        if (!referrer) return { source: 'Direct', medium: 'none', campaign: 'none' };
+
+        try {
+            const refUrl = new URL(referrer);
+            const host = refUrl.hostname.toLowerCase();
+
+            if (host.includes('google') || host.includes('bing') || host.includes('yahoo')) 
+                return { source: 'Organic Search', medium: 'organic', campaign: 'none' };
+            
+            if (host.includes('facebook') || host.includes('instagram') || host.includes('t.co') || host.includes('linkedin') || host.includes('reddit') || host.includes('tiktok')) 
+                return { source: 'Social Media', medium: 'social', campaign: 'none' };
+            
+            if (host.includes(window.location.hostname)) 
+                return { source: 'Internal', medium: 'internal', campaign: 'none' };
+
+            return { source: 'Referral (' + host + ')', medium: 'referral', campaign: 'none' };
+        } catch(e) {
+            return { source: 'Referral', medium: 'referral', campaign: 'none' };
+        }
+    }
+
+    // 4. Visitor Status (New vs Returning)
+    function getVisitorStatus() {
+        const isReturning = localStorage.getItem('dino_returning_visitor');
+        if (!isReturning) {
+            localStorage.setItem('dino_returning_visitor', 'true');
+            return 'New';
+        }
+        return 'Returning';
+    }
+
+    const { source, medium, campaign } = getSourceDetails();
+
+    // 5. Session Tracking Object
     let sessionData = {
         id: Math.random().toString(36).substring(2, 15),
         ts: Date.now(),
@@ -58,12 +98,16 @@
         countryName: 'Unknown',
         city: 'Unknown',
         device: getDeviceType(),
-        source: getSource(),
+        browser: getBrowserInfo(),
+        visitorStatus: getVisitorStatus(),
+        source: source,
+        medium: medium,
+        campaign: campaign,
         path: window.location.pathname,
         duration: 0
     };
 
-    // 5. Geolocation
+    // 6. Geolocation
     if (!sessionStorage.getItem('dino_geo_tracked')) {
         fetch(CONFIG.IP_SERVICE)
             .then(r => r.json())
@@ -90,13 +134,9 @@
         saveVisit();
     }
 
-    // 6. Data Persistence (Using Queue Pattern)
+    // 7. Data Persistence
     function saveVisit() {
-        // We only save the initial visit once per page load to avoid duplicates
-        // But we'll update the duration on exit/heartbeat
         const visits = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '[]');
-        
-        // Find existing session in this page load if any
         const existingIdx = visits.findIndex(v => v.sessionId === sessionData.id);
         
         const entry = {
@@ -106,9 +146,13 @@
             countryName: sessionData.countryName,
             city: sessionData.city,
             device: sessionData.device,
+            browser: sessionData.browser,
+            visitorStatus: sessionData.visitorStatus,
             source: sessionData.source,
+            medium: sessionData.medium,
+            campaign: sessionData.campaign,
             path: sessionData.path,
-            duration: sessionData.duration
+            duration: Math.round(sessionData.duration)
         };
 
         if (existingIdx >= 0) {
@@ -117,28 +161,23 @@
             visits.push(entry);
         }
 
-        // Limit storage to last 5000 visits to prevent localStorage bloat
         if (visits.length > 5000) visits.shift();
-        
         localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(visits));
     }
 
-    // 7. Heartbeat & Exit tracking
+    // 8. Heartbeat & Exit tracking
     setInterval(() => {
         sessionData.duration += CONFIG.HEARTBEAT_INTERVAL / 1000;
         saveVisit();
     }, CONFIG.HEARTBEAT_INTERVAL);
 
     window.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-            saveVisit();
-        }
+        if (document.visibilityState === 'hidden') saveVisit();
     });
 
-    // Special case for beforeunload to ensure duration is captured
     window.addEventListener('beforeunload', () => {
         saveVisit();
     });
 
-    console.log('[DinoAnalytics] Tracker initialized.', sessionData.device, sessionData.source);
+    console.log('[DinoAnalytics] Tracker initialized v2.', sessionData.device, sessionData.browser, sessionData.visitorStatus);
 })();

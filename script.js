@@ -55,7 +55,7 @@ const translations = {
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
     "games.play": "Play",
-    "games.wip": "W.I.P",
+    "games.wip": "<i class=\"fas fa-hourglass-half\"></i> Coming Soon",
     "games.playersLabel": "Players",
     "games.genre.racing": "Racing",
     "games.genre.action": "Action",
@@ -138,7 +138,7 @@ const translations = {
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
     "games.play": "Oyna",
-    "games.wip": "W.I.P",
+    "games.wip": "<i class=\"fas fa-hourglass-half\"></i> ÇOK YAKINDA",
     "games.playersLabel": "Oyuncu",
     "games.genre.racing": "Yarış",
     "games.genre.action": "AKSİYON",
@@ -337,6 +337,9 @@ const heroSwiper = new Swiper('.hero-slider', {
       } else if (index === 3) {
         document.querySelector('.volt-logo').classList.add('active');
         if (playBtn) playBtn.href = "https://store.playstation.com/tr-tr/product/EB2251-CUSA58133_00-0504252544586584";
+      } else if (index === 4) {
+        document.querySelector('.roll-logo').classList.add('active');
+        if (playBtn) playBtn.href = "https://store.steampowered.com/app/4537030/Rhythm_Roll/";
       }
     },
     init: function () {
@@ -353,6 +356,9 @@ const heroSwiper = new Swiper('.hero-slider', {
         } else if (index === 3) {
           document.querySelector('.volt-logo').classList.add('active');
           if (playBtn) playBtn.href = "https://store.playstation.com/tr-tr/product/EB2251-CUSA58133_00-0504252544586584";
+        } else if (index === 4) {
+          document.querySelector('.roll-logo').classList.add('active');
+          if (playBtn) playBtn.href = "https://store.steampowered.com/app/4537030/Rhythm_Roll/";
         }
       }, 100);
     }
@@ -491,7 +497,7 @@ function updateContent() {
     const key = element.getAttribute('data-i18n');
     const translation = translations[currentLang][key];
     if (translation !== undefined && translation !== null) {
-      const htmlKeys = ['games.comingsoon', 'games.playstation', 'games.nintendo', 'games.steam', 'porting.quote'];
+      const htmlKeys = ['games.wip', 'games.comingsoon', 'games.playstation', 'games.nintendo', 'games.steam', 'porting.quote'];
       if (htmlKeys.includes(key)) {
         element.innerHTML = translation;
       } else {
@@ -627,6 +633,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = link.getAttribute('data-url');
       if (url) {
         window.open(url, '_blank');
+      }
+    });
+  });
+
+  // Handle Game Image Click
+  const gameImages = document.querySelectorAll('.library-content .game-card-img-container img');
+  gameImages.forEach(img => {
+    img.addEventListener('click', (e) => {
+      const parentItem = img.closest('.library-item');
+      if (parentItem && parentItem.classList.contains('expanded')) {
+        e.stopPropagation();
+        const link = parentItem.querySelector('.play-link');
+        if (link) {
+          const url = link.getAttribute('data-url');
+          if (url) {
+            window.open(url, '_blank');
+          }
+        }
       }
     });
   });
