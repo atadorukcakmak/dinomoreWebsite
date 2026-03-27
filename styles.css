@@ -2700,6 +2700,12 @@ section.contact {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
+.play-link:not([data-url]) {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 /* Placeholder Cards Styles */
 .placeholder-img {
     display: flex !important;

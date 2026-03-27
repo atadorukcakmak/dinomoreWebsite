@@ -4,537 +4,739 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinomore Admin Panel</title>
+    <title>Dinomore | Advanced Analytics</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="../analytics.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* ===== Login Screen Styles ===== */
-        .login-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0a0a1a;
+            --bg-card: rgba(15, 15, 30, 0.7);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.2);
+            --purple: #7d2ae8;
+            --pink: #ff2d95;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(0, 242, 255, 0.2);
+            --font: 'Inter', sans-serif;
+            --glass: blur(12px) saturate(180%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
             background: var(--bg-primary);
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        .login-overlay.hidden {
-            opacity: 0;
-            visibility: hidden;
+        /* ===== BACKGROUND GLOWS ===== */
+        .bg-glow {
+            position: fixed;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
             pointer-events: none;
         }
+        .glow-1 { background: var(--accent); top: -20vw; right: -20vw; }
+        .glow-2 { background: var(--purple); bottom: -10vw; left: -10vw; }
 
-        .login-overlay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse at 30% 30%, rgba(233, 69, 96, 0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 70%, rgba(83, 52, 131, 0.15) 0%, transparent 50%);
-            pointer-events: none;
+        /* ===== LOGIN SCREEN ===== */
+        #loginOverlay {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg-primary);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        #loginOverlay.hidden { opacity: 0; visibility: hidden; transform: scale(1.1); }
 
         .login-card {
-            position: relative;
-            width: 100%;
-            max-width: 420px;
-            padding: 48px 40px;
-            background: var(--bg-card);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
-            animation: loginAppear 0.6s ease forwards;
-        }
-
-        @keyframes loginAppear {
-            from {
-                opacity: 0;
-                transform: translateY(24px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .login-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            margin-bottom: 12px;
-        }
-
-        .login-logo img {
-            height: 44px;
-            width: auto;
-        }
-
-        .login-logo-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .login-subtitle {
+            width: 100%; max-width: 440px; padding: 48px;
+            background: var(--bg-card); backdrop-filter: var(--glass);
+            border: 1px solid var(--border); border-radius: 32px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
             text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 36px;
-            letter-spacing: 0.03em;
         }
 
-        .login-field {
-            margin-bottom: 20px;
-        }
+        .login-logo { font-size: 2rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+        .login-logo span { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        .login-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; }
 
-        .login-field label {
-            display: block;
-            font-size: 0.78rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper > i:first-of-type:not(.toggle-password) { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+        .input-wrapper input {
+            width: 100%; padding: 14px 40px 14px 44px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 12px; color: #fff; outline: none; transition: 0.3s;
         }
-
-        .login-field .input-wrapper {
-            position: relative;
+        .input-wrapper input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+        .toggle-password {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: var(--text-muted); transition: 0.3s; z-index: 10;
         }
-
-        .login-field .input-wrapper i:not(.toggle-password) {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .login-field input {
-            width: 100%;
-            padding: 14px 46px 14px 46px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: var(--font);
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .login-field input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .login-field input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .login-field input:focus+i,
-        .login-field .input-wrapper:focus-within i:not(.toggle-password) {
-            color: var(--accent);
-        }
-
-        .login-field .input-wrapper .toggle-password {
-            position: absolute;
-            right: 16px;
-            left: auto;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 8px;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .toggle-password:hover {
-            color: var(--text-primary);
-        }
+        .toggle-password:hover { color: var(--accent); }
 
         .login-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
+            width: 100%; padding: 16px; margin-top: 24px;
             background: linear-gradient(135deg, var(--accent), var(--purple));
-            color: #fff;
-            font-family: var(--font);
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            letter-spacing: 0.02em;
+            border: none; border-radius: 12px; color: #fff; font-weight: 700;
+            cursor: pointer; transition: 0.3s;
         }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--accent-glow); filter: brightness(1.1); }
 
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--accent-glow);
-            filter: brightness(1.1);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-error {
+        /* ===== DASHBOARD LAYOUT ===== */
+        .dashboard {
             display: none;
-            text-align: center;
-            color: var(--accent);
-            font-size: 0.85rem;
-            margin-top: 16px;
-            padding: 10px;
-            background: rgba(233, 69, 96, 0.08);
-            border-radius: 8px;
-            border: 1px solid rgba(233, 69, 96, 0.15);
-            animation: shake 0.4s ease;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        .dashboard.active { display: grid; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            padding: 32px; border-right: 1px solid var(--border);
+            background: rgba(5, 5, 10, 0.8); backdrop-filter: var(--glass);
+            display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+        }
+        .sidebar-logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 48px; }
+        .sidebar-logo span { color: var(--accent); }
+        
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 500; font-size: 0.95rem; transition: 0.3s;
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: var(--accent); }
+        .nav-item.active { background: var(--accent-glow); border: 1px solid var(--border-accent); }
+
+        .sidebar-user { margin-top: auto; padding-top: 32px; border-top: 1px solid var(--border); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+        /* --- Main Content --- */
+        .main { padding: 40px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header-title h1 { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
+        .header-title p { color: var(--text-muted); }
+
+        .header-actions { display: flex; gap: 16px; align-items: center; }
+        .filter-tabs { background: var(--bg-card); padding: 4px; border-radius: 12px; border: 1px solid var(--border); display: flex; gap: 4px; }
+        .filter-tab {
+            padding: 8px 16px; border: none; background: none; color: var(--text-muted);
+            font-weight: 600; cursor: pointer; border-radius: 8px; transition: 0.3s;
+        }
+        .filter-tab.active { background: var(--accent); color: var(--bg-primary); }
+
+        .btn {
+            padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--bg-card); color: #fff; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+        /* --- Grid & Cards --- */
+        .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-8 { grid-column: span 8; }
+        .col-12 { grid-column: span 12; }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px;
+            backdrop-filter: var(--glass); transition: 0.3s;
+        }
+        .card:hover { border-color: var(--border-accent); }
+
+        .stat-card { padding: 32px; }
+        .stat-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 2rem; font-weight: 800; margin-top: 4px; }
+        .stat-trend { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .trend-up { color: #00ff88; } .trend-down { color: #ff3366; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--accent); }
+
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* --- Map Container --- */
+        .map-container { position: relative; height: 400px; width: 100%; border-radius: 16px; background: rgba(0,0,0,0.2); }
+        .map-tooltip {
+            position: absolute; padding: 8px 12px; border-radius: 8px;
+            background: var(--bg-secondary); border: 1px solid var(--border-accent);
+            font-size: 0.8rem; pointer-events: none; z-index: 100; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .login-error.show {
-            display: block;
+        /* --- Table Style --- */
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        td { padding: 16px; background: rgba(255,255,255,0.02); }
+        td:first-child { border-radius: 12px 0 0 12px; width: 50px; }
+        td:last-child { border-radius: 0 12px 12px 0; }
+        .country-flag { font-size: 1.2rem; }
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); border-radius: 10px; }
+
+        /* --- Animation --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { animation: fadeIn 0.5s ease backwards; }
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+
+        @media screen and (max-width: 1200px) {
+            .col-3, .col-4 { grid-column: span 6; }
+            .col-8 { grid-column: span 12; }
         }
 
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            20% {
-                transform: translateX(-8px);
-            }
-
-            40% {
-                transform: translateX(8px);
-            }
-
-            60% {
-                transform: translateX(-4px);
-            }
-
-            80% {
-                transform: translateX(4px);
-            }
+        @media screen and (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .col-6 { grid-column: span 12; }
         }
 
-        .login-footer {
-            text-align: center;
-            margin-top: 28px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            opacity: 0.5;
+        /* PRINT STYLES */
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            body { background: #fff !important; color: #000 !important; font-size: 10pt; }
+            .sidebar, .bg-glow, .header-actions, #addDemoBtn, .login-overlay, #loginOverlay { display: none !important; }
+            .main { padding: 0 !important; margin: 0 !important; width: 100% !important; overflow: visible !important; }
+            .dashboard { display: block !important; }
+            .dash-section { display: block !important; opacity: 1 !important; }
+            
+            .grid { display: flex !important; flex-wrap: wrap !important; gap: 15px !important; }
+            .card { 
+                border: 1px solid #ddd !important; background: #fff !important; 
+                box-shadow: none !important; border-radius: 12px !important;
+                padding: 15px !important; break-inside: avoid !important;
+                flex: 1 1 calc(50% - 15px) !important;
+                min-width: 200px !important;
+            }
+            .col-12 { flex: 1 1 100% !important; }
+            .chart-container { height: 180px !important; }
+            .stat-card { padding: 15px !important; flex: 1 1 calc(25% - 15px) !important; }
+            .stat-value { font-size: 1.5rem !important; }
+            
+            #print-report-header { display: flex !important; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+            #print-report-header img { height: 30px; }
+            #print-report-header div { text-align: right; }
+            #print-report-header h2 { font-size: 1.2rem; color: #000; }
+            
+            .map-container { height: 250px !important; }
+            table td, table th { padding: 8px !important; font-size: 9pt !important; }
+            .bar-bg { background: #eee !important; }
+            .bar-fill { background: #000 !important; }
         }
 
-        /* Dashboard locked state */
-        .dashboard-content {
+        #print-report-header { display: none; }
+
+        /* --- Section Transitions --- */
+        .dash-section {
             display: none;
+            animation: fadeIn 0.5s ease-out;
         }
-
-        .dashboard-content.unlocked {
+        .dash-section.active {
             display: block;
-        }
-
-        /* Logout button in header */
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            border: 1px solid rgba(233, 69, 96, 0.3);
-            background: rgba(233, 69, 96, 0.08);
-            color: var(--accent);
-            font-family: var(--font);
-            font-size: 0.82rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-logout:hover {
-            background: rgba(233, 69, 96, 0.2);
-            border-color: var(--accent);
-        }
-
-        @media (max-width: 480px) {
-            .login-card {
-                margin: 16px;
-                padding: 32px 24px;
-            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Login Overlay -->
-    <div class="login-overlay" id="loginOverlay">
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+
+    <!-- Login Screen -->
+    <div id="loginOverlay">
         <div class="login-card">
-            <div class="login-logo">
-                <img src="../logo.png" alt="Dinomore">
-                <span class="login-logo-text">Admin Panel</span>
-            </div>
-            <p class="login-subtitle">Analitik paneline erişmek için giriş yapın</p>
-
-            <form id="loginForm" autocomplete="off">
-                <div class="login-field">
-                    <label>Kullanıcı Adı</label>
+            <img src="../logo.png" alt="Dinomore" style="height: 48px; margin-bottom: 12px;">
+            <p class="login-subtitle" id="login-subtitle">Yönetici Analiz Portalı</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label id="label-user">Kullanıcı Adı</label>
                     <div class="input-wrapper">
-                        <input type="text" id="loginUser" placeholder="Kullanıcı adınız" autofocus required>
                         <i class="fas fa-user"></i>
+                        <input type="text" id="loginUser" placeholder="AdminDino" required autofocus>
                     </div>
                 </div>
-                <div class="login-field">
-                    <label>Şifre</label>
+                <div class="input-group">
+                    <label id="label-pass">Şifre</label>
                     <div class="input-wrapper">
-                        <input type="password" id="loginPass" placeholder="Şifreniz" required>
                         <i class="fas fa-lock"></i>
-                        <i class="fas fa-eye toggle-password" id="togglePass"></i>
+                        <input type="password" id="loginPass" placeholder="••••••••" required>
+                        <i class="fas fa-eye toggle-password" data-target="loginPass"></i>
                     </div>
                 </div>
-                <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
-                </button>
-                <div class="login-error" id="loginError">
-                    <i class="fas fa-exclamation-triangle"></i> Kullanıcı adı veya şifre hatalı
-                </div>
+                <button type="submit" class="login-btn" id="loginSubmitBtn">Secure Login</button>
+                <p id="loginError" style="color:var(--pink); font-size:0.8rem; margin-top:16px; display:none;"></p>
             </form>
-
-            <div class="login-footer">
-                <i class="fas fa-shield-alt"></i> Dinomore Games — Güvenli Erişim
-            </div>
         </div>
     </div>
 
-    <!-- Dashboard Content (hidden until login) -->
-    <div class="dashboard-content" id="dashboardContent">
-        <!-- Header -->
-        <header class="analytics-header">
-            <div class="header-left">
-                <a href="../index.html" class="back-link"><i class="fas fa-arrow-left"></i></a>
-                <div class="header-brand">
-                    <img src="../logo.png" alt="Dinomore" class="header-logo">
-                    <h1>Traffic Analytics</h1>
+    <!-- Dashboard -->
+    <div class="dashboard" id="dash">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../logo.png" alt="Dinomore" style="height: 32px;">
+            </div>
+            <nav class="nav-links">
+                <a href="#" id="nav-overview" class="nav-item active" onclick="switchSection('overview')"><i class="fas fa-chart-pie"></i> <span data-i18n="nav.overview">Overview</span></a>
+                <a href="#" id="nav-audience" class="nav-item" onclick="switchSection('audience')"><i class="fas fa-users"></i> <span data-i18n="nav.audience">Audience</span></a>
+                <a href="#" id="nav-campaigns" class="nav-item" onclick="switchSection('campaigns')"><i class="fas fa-bullseye"></i> <span data-i18n="nav.campaigns">Campaigns</span></a>
+                <a href="#" id="nav-settings" class="nav-item" onclick="switchSection('settings')"><i class="fas fa-cog"></i> <span data-i18n="nav.settings">Settings</span></a>
+            </nav>
+            <div class="sidebar-user">
+                <div class="user-info">
+                    <div class="user-avatar">AD</div>
+                    <div style="flex:1">
+                        <p style="font-size:0.85rem; font-weight:700;">Admin Dino</p>
+                        <p style="font-size:0.7rem; color:var(--text-muted);" data-i18n="nav.role">Lead Developer</p>
+                    </div>
+                    <a href="#" id="logoutBtn" style="color:var(--text-muted)"><i class="fas fa-power-off"></i></a>
                 </div>
             </div>
-            <div class="header-right">
-                <span class="live-badge"><span class="live-dot"></span> Live</span>
-                <button id="clearDataBtn" class="btn-clear" title="Verileri Temizle">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-                <button id="addDemoBtn" class="btn-demo" title="Demo Verisi Ekle">
-                    <i class="fas fa-plus-circle"></i> Demo
-                </button>
-                <button id="logoutBtn" class="btn-logout" title="Çıkış Yap">
-                    <i class="fas fa-sign-out-alt"></i> Çıkış
-                </button>
-            </div>
-        </header>
+        </aside>
 
-        <!-- Stats Cards -->
-        <section class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <div class="stat-info">
-                    <span class="stat-value" id="totalVisits">0</span>
-                    <span class="stat-label">Toplam Ziyaret</span>
+        <main class="main">
+            <!-- Print Header -->
+            <div id="print-report-header">
+                <img src="../logo.png" alt="Dinomore">
+                <div>
+                    <h2>Advanced Analytics Report</h2>
+                    <p id="print-date" style="font-size:0.8rem; color:#666;"></p>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-globe-americas"></i></div>
-                <div class="stat-info">
-                    <span class="stat-value" id="uniqueCountries">0</span>
-                    <span class="stat-label">Ülke</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
-                <div class="stat-info">
-                    <span class="stat-value" id="todayVisits">0</span>
-                    <span class="stat-label">Bugün</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-                <div class="stat-info">
-                    <span class="stat-value" id="weekVisits">0</span>
-                    <span class="stat-label">Bu Hafta</span>
-                </div>
-            </div>
-        </section>
 
-        <!-- Filter Bar -->
-        <section class="filter-bar">
-            <div class="filter-tabs">
-                <button class="filter-tab active" data-range="all">Tümü</button>
-                <button class="filter-tab" data-range="30">Son 30 Gün</button>
-                <button class="filter-tab" data-range="7">Son 7 Gün</button>
-                <button class="filter-tab" data-range="1">Bugün</button>
+            <header class="header">
+                <div class="header-title">
+                    <h1 data-i18n="dash.title">Dashboard</h1>
+                    <p data-i18n="dash.subtitle">Real-time traffic overview & insights</p>
+                </div>
+                <div class="header-actions">
+                    <div class="filter-tabs" style="margin-right: 12px; background: rgba(255,255,255,0.03);">
+                        <button class="filter-tab lang-btn-admin" data-lang="en" onclick="changeLanguage('en')">EN</button>
+                        <button class="filter-tab lang-btn-admin" data-lang="tr" onclick="changeLanguage('tr')">TR</button>
+                    </div>
+                    <div class="filter-tabs">
+                        <button class="filter-tab range-tab" data-range="1" data-i18n="range.24h" data-i18n-title="range.24h.title" title="Daily/Hourly" onclick="setRange('1', this)">24H</button>
+                        <button class="filter-tab range-tab active" data-range="7" data-i18n="range.7d" onclick="setRange('7', this)">7D</button>
+                        <button class="filter-tab range-tab" data-range="30" data-i18n="range.30d" onclick="setRange('30', this)">30D</button>
+                        <button class="filter-tab range-tab" data-range="90" data-i18n="range.90d" onclick="setRange('90', this)">90D</button>
+                    </div>
+                    <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> <span data-i18n="btn.report">Report</span></button>
+                </div>
+            </header>
+
+            <!-- Dashboard Sections -->
+            <div id="overview-section" class="dash-section active">
+                <!-- Current Overview Content -->
+
+
+            <!-- Stats Bar -->
+            <div class="grid" style="margin-bottom: 32px;">
+                <div class="card stat-card col-3">
+                    <span class="stat-label" data-i18n="stat.visits">Total Visits</span>
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 12.5%</div>
+                </div>
+                <div class="card stat-card col-3">
+                    <span class="stat-label" data-i18n="stat.active">Active Users</span>
+                    <div class="stat-value" id="todayVisits" style="color:var(--accent)">0</div>
+                    <div class="stat-trend"><i class="fas fa-circle" style="font-size:0.5rem; color:#00ff88"></i> <span data-i18n="stat.active_now">Active now</span></div>
+                </div>
+                <div class="card stat-card col-3">
+                    <span class="stat-label" data-i18n="stat.duration">Avg. Duration</span>
+                    <div class="stat-value" id="avgDuration">0m 0s</div>
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> 2.1%</div>
+                </div>
+                <div class="card stat-card col-3">
+                    <span class="stat-label" data-i18n="stat.bounces">Bounces</span>
+                    <div class="stat-value">34.2%</div>
+                    <div class="stat-trend trend-up"><i class="fas fa-check-circle"></i> Healthy</div>
+                </div>
             </div>
-        </section>
 
-        <!-- Main Content -->
-        <main class="analytics-main">
-            <!-- World Map -->
-            <section class="map-section">
-                <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> Dünya Haritası</h2>
-                <div class="map-container" id="mapContainer"></div>
-                <div class="map-legend">
-                    <span class="legend-item"><span class="legend-color" style="background:#1a1a3a"></span> Az</span>
-                    <span class="legend-item"><span class="legend-color" style="background:#3a00ff"></span> Düşük</span>
-                    <span class="legend-item"><span class="legend-color" style="background:#ff2d95"></span> Orta</span>
-                    <span class="legend-item"><span class="legend-color" style="background:#7d2ae8"></span>
-                        Yüksek</span>
-                    <span class="legend-item"><span class="legend-color" style="background:#00f2ff"></span> En
-                        Yüksek</span>
+            <!-- Main Charts -->
+            <div class="grid">
+                <!-- Trend -->
+                <div class="card col-8">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-line"></i> <span data-i18n="chart.trend">Traffic Trend</span></h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
                 </div>
-            </section>
 
-            <!-- Country Table -->
-            <section class="table-section">
-                <h2 class="section-title"><i class="fas fa-list-ol"></i> Ülke Detayları</h2>
-                <div class="table-wrapper">
-                    <table class="country-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Ülke</th>
-                                <th>Ziyaret</th>
-                                <th>Oran</th>
-                                <th class="bar-col">Grafik</th>
-                            </tr>
-                        </thead>
-                        <tbody id="countryTableBody">
-                        </tbody>
-                    </table>
+                <!-- Sources -->
+                <div class="card col-4">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-compass"></i> <span data-i18n="chart.sources">Sources</span></h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sourcesChart"></canvas>
+                    </div>
                 </div>
-            </section>
 
-            <!-- Daily Chart -->
-            <section class="chart-section">
-                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Günlük Trafik</h2>
-                <div class="chart-container" id="dailyChart"></div>
-            </section>
+                <!-- Global Distribution -->
+                <div class="card col-8">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-globe-americas"></i> <span data-i18n="chart.heatmap">Visitor Heatmap</span></h3>
+                    </div>
+                    <div id="mapContainer" class="map-container"></div>
+                </div>
+
+                <!-- AI Insights -->
+                <div class="card col-4" style="background: linear-gradient(135deg, rgba(125, 42, 232, 0.1), rgba(0, 242, 255, 0.05)); border: 1px solid rgba(125, 42, 232, 0.3);">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-brain"></i> <span data-i18n="chart.insights">AI Insights</span></h3>
+                    </div>
+                    <div id="insightsContent" style="display:flex; flex-direction:column; gap:16px;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Analyzing data...</p>
+                    </div>
+                </div>
+
+                <!-- Device Distribution -->
+                <div class="card col-4">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-mobile-alt"></i> <span data-i18n="chart.devices">Devices</span></h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="devicesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Hourly Density -->
+                <div class="card col-8">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-clock"></i> <span data-i18n="chart.hourly">Hourly Density</span></h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Countries -->
+                <div class="card col-12">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-list-ol"></i> <span data-i18n="table.title">Top Performing Regions</span></h3>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th data-i18n="table.region">Region</th>
+                                    <th data-i18n="table.visits">Visits</th>
+                                    <th data-i18n="table.pct">% of Total</th>
+                                    <th data-i18n="table.share">Market Share</th>
+                                </tr>
+                            </thead>
+                            <tbody id="countryTableBody">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Audience Section -->
+            <div id="audience-section" class="dash-section" style="display:none;">
+                <div class="card col-12">
+                    <h2 style="margin-bottom:16px;" data-i18n="audience.title">Audience Analytics</h2>
+                    <p style="color:var(--text-muted);" data-i18n="audience.subtitle">Detailed breakdown of visitor demographics and behavior patterns.</p>
+                    <div style="height:300px; display:flex; align-items:center; justify-content:center; border: 1px dashed var(--border); border-radius:12px; margin-top:20px;">
+                        <p><i class="fas fa-tools"></i> <span data-i18n="audience.status">Audience module is being synchronized...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaigns Section -->
+            <div id="campaigns-section" class="dash-section" style="display:none;">
+                <div class="card col-12">
+                    <h2 style="margin-bottom:16px;" data-i18n="campaigns.title">Marketing Campaigns</h2>
+                    <p style="color:var(--text-muted);" data-i18n="campaigns.subtitle">Track performance of your active marketing channels and UTM parameters.</p>
+                    <div style="height:300px; display:flex; align-items:center; justify-content:center; border: 1px dashed var(--border); border-radius:12px; margin-top:20px;">
+                        <p><i class="fas fa-rocket"></i> <span data-i18n="campaigns.status">Campaign tracking is initializing...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="dash-section" style="display:none;">
+                <div class="grid">
+                    <div class="card col-6">
+                        <h3 class="card-title"><i class="fas fa-lock"></i> <span data-i18n="settings.security.title">Hesap Güvenliği</span></h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Mevcut kullanıcı adı ve şifrenizi güncelleyin.</p>
+                        <form id="updateAccountForm" onsubmit="return false;">
+                            <div class="input-group">
+                                <label>Yeni Kullanıcı Adı</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-user-edit"></i>
+                                    <input type="text" id="updateUser" placeholder="Yeni Kullanıcı Adı" required>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Yeni Şifre</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-key"></i>
+                                    <input type="password" id="updatePass" placeholder="••••••••" required>
+                                    <i class="fas fa-eye toggle-password" data-target="updatePass"></i>
+                                </div>
+                            </div>
+                            <button type="button" class="login-btn" style="margin-top:8px;" onclick="window.Actions.updateAccount()">Bilgileri Güncelle</button>
+                        </form>
+                        <p id="updateAccountMsg" style="margin-top:12px; font-size:0.8rem; display:none;"></p>
+                    </div>
+
+                    <div class="card col-6">
+                        <h3 class="card-title"><i class="fas fa-user-plus"></i> <span data-i18n="settings.admin.title">Yönetici Yönetimi</span></h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Ek bir yönetici profili oluşturun.</p>
+                        <form id="createAdminForm" onsubmit="return false;">
+                            <div class="input-group">
+                                <label>Yeni Yönetici Adı</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-user-plus"></i>
+                                    <input type="text" id="newAdminUser" placeholder="örn. Ahmet Yılmaz" required>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Yeni Yönetici Şifresi</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="newAdminPass" placeholder="••••••••" required>
+                                    <i class="fas fa-eye toggle-password" data-target="newAdminPass"></i>
+                                </div>
+                            </div>
+                            <button type="button" class="btn" style="width:100%; justify-content:center; background: var(--purple-grad); border:none; color:white; font-weight:600; box-shadow: 0 4px 15px rgba(125, 42, 232, 0.3);" onclick="window.Actions.createAdmin()">
+                                <i class="fas fa-user-plus"></i> Hesap Oluştur
+                            </button>
+                        </form>
+                        <p id="createAdminMsg" style="margin-top:12px; font-size:0.8rem; display:none;"></p>
+                    </div>
+
+                    <div class="card col-12">
+                        <h3 class="card-title"><i class="fas fa-vial"></i> <span data-i18n="settings.utils.title">System Utilities</span></h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;" data-i18n="settings.utils.subtitle">Developer tools and data simulation.</p>
+                        <div style="display:flex; gap:16px;">
+                            <button class="btn" id="addDemoBtn" style="border-color:var(--purple); color:var(--purple); flex:1; justify-content:center;">
+                                <i class="fas fa-magic"></i> <span data-i18n="btn.demo">Demo</span>
+                            </button>
+                            <button class="btn" onclick="if(confirm('Tüm verileri silmek istediğinizden emin misiniz?')) { localStorage.removeItem('dino_visits'); location.reload(); }" style="border-color:var(--pink); color:var(--pink); flex:1; justify-content:center;">
+                                <i class="fas fa-trash-alt"></i> <span data-i18n="settings.utils.clear">Verileri Temizle</span>
+                            </button>
+                            <button class="btn" onclick="if(confirm('Yönetici listesini varsayılana sıfırlamak istiyor musunuz? (AdminDino geri yüklenir)')) { localStorage.removeItem('dino_admins'); location.reload(); }" style="border-color:var(--yellow); color:var(--yellow); flex:1; justify-content:center;">
+                                <i class="fas fa-undo"></i> <span>Hesapları Sıfırla</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Tooltip -->
-    <div class="map-tooltip" id="mapTooltip" style="display:none"></div>
+    <div class="map-tooltip" id="mapTooltip"></div>
 
-    <!-- Login Script -->
+    <!-- Login & Dashboard Logic -->
     <script>
-        // Simple hash for client-side auth (not production-secure, but sufficient for admin panel)
-        async function sha256(str) {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        window.AuthManager = {
+            DEFAULT_U_HASH: 'cbda2490ca5cbcfb3c15dcede296039506f031b25c483bd69c4ce52b2f7cdd4c', // AdminDino
+            DEFAULT_P_HASH: 'd480a7b765cb606eb45c42cdd3e0049cdc92aba37f730de811f8a9e818886ea0', // AdminDino123
+            FALLBACK_P_HASH: 'af7aadb5ac0d2e1c8e3b1dc9d6dbb98e3ccab87b15cfe04bfe899c35cb0d30f4', // DinomoreOdtu2026
 
-        // Pre-computed SHA-256 hashes
-        const VALID_USER_HASH = 'cbda2490ca5cbcfb3c15dcede296039506f031b25c483bd69c4ce52b2f7cdd4c'; // admindino (lowercase)
-        const VALID_PASS_HASH = 'd480a7b765cb606eb45c42cdd3e0049cdc92aba37f730de811f8a9e818886ea0'; // AdminDino123
-        const VALID_PASS_FALLBACK = 'af7aadb5ac0d2e1c8e3b1dc9d6dbb98e3ccab87b15cfe04bfe899c35cb0d30f4'; // DinomoreOdtu2026
+            async hash(str) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
 
-        const SESSION_KEY = 'dino_admin_session';
-        const SESSION_DURATION = 4 * 60 * 60 * 1000; // 4 hours
+            getAdmins() {
+                let admins = JSON.parse(localStorage.getItem('dino_admins') || '[]');
+                if (admins.length === 0) {
+                    admins = [{ u: this.DEFAULT_U_HASH, p: this.DEFAULT_P_HASH }];
+                    localStorage.setItem('dino_admins', JSON.stringify(admins));
+                }
+                return admins;
+            },
 
-        function isSessionValid() {
-            const session = localStorage.getItem(SESSION_KEY);
-            if (!session) return false;
-            try {
-                const { ts } = JSON.parse(session);
-                return Date.now() - ts < SESSION_DURATION;
-            } catch { return false; }
-        }
+            async validate(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                const admins = this.getAdmins();
+                return admins.some(a => a.u === u && a.p === p) || (u === this.DEFAULT_U_HASH && p === this.FALLBACK_P_HASH);
+            },
 
-        function createSession() {
-            localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now() }));
-        }
+            async addAdmin(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                let admins = this.getAdmins();
+                if (admins.some(a => a.u === u)) return { success: false, msg: 'User already exists' };
+                admins.push({ u, p });
+                localStorage.setItem('dino_admins', JSON.stringify(admins));
+                return { success: true };
+            },
 
-        function destroySession() {
-            localStorage.removeItem(SESSION_KEY);
-        }
+            async updateAdmin(oldUser, newUser, newPass) {
+                const oldU = await this.hash(oldUser.trim().toLowerCase());
+                const newU = await this.hash(newUser.trim().toLowerCase());
+                const newP = await this.hash(newPass);
+                let admins = this.getAdmins();
+                const idx = admins.findIndex(a => a.u === oldU);
+                if (idx === -1) return { success: false, msg: 'Original user not found' };
+                admins[idx] = { u: newU, p: newP };
+                localStorage.setItem('dino_admins', JSON.stringify(admins));
+                return { success: true };
+            }
+        };
 
-        function unlockDashboard() {
+        function unlock() {
             document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('dashboardContent').classList.add('unlocked');
-            // Load analytics script dynamically
-            if (!document.getElementById('analyticsScript')) {
+            document.getElementById('dash').classList.add('active');
+            if(!document.getElementById('engineScript')) {
                 const s = document.createElement('script');
-                s.id = 'analyticsScript';
+                s.id = 'engineScript';
                 s.src = '../analytics.js';
                 document.body.appendChild(s);
             }
         }
 
-        function lockDashboard() {
-            destroySession();
-            document.getElementById('loginOverlay').classList.remove('hidden');
-            document.getElementById('dashboardContent').classList.remove('unlocked');
-        }
-
-        // Check existing session on load
-        if (isSessionValid()) {
-            unlockDashboard();
-        }
-
-        // Login form
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value;
             const errorEl = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const userInput = document.getElementById('loginUser');
+            const passInput = document.getElementById('loginPass');
 
-            const userHash = await sha256(user.toLowerCase()); // Case-insensitive
-            const passHash = await sha256(pass);
+            errorEl.style.display = 'none';
+            if(!userInput.value.trim()) { errorEl.innerText = "Lütfen kullanıcı adınızı girin."; errorEl.style.display = 'block'; return; }
+            if(!passInput.value) { errorEl.innerText = "Lütfen şifrenizi girin."; errorEl.style.display = 'block'; return; }
 
-            if (userHash === VALID_USER_HASH && (passHash === VALID_PASS_HASH || passHash === VALID_PASS_FALLBACK)) {
-                errorEl.classList.remove('show');
-                createSession();
-                unlockDashboard();
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Giriş yapılıyor...";
+            submitBtn.style.opacity = '0.7';
+
+            if (await AuthManager.validate(userInput.value, passInput.value)) {
+                localStorage.setItem('dino_dash_auth', Date.now());
+                localStorage.setItem('dino_dash_user', userInput.value.trim().toLowerCase());
+                unlock();
             } else {
-                errorEl.classList.add('show');
-                document.getElementById('loginPass').value = '';
+                setTimeout(() => {
+                    errorEl.innerText = "Kullanıcı adı veya şifre hatalı.";
+                    errorEl.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Giriş Yap";
+                    submitBtn.style.opacity = '1';
+                }, 400);
             }
         });
 
-        // Logout & UI behavior
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', lockDashboard);
-            }
+        ['loginUser', 'loginPass'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                document.getElementById('loginError').style.display = 'none';
+            });
+        });
 
-            // Password toggle
-            const toggleBtn = document.getElementById('togglePass');
-            const passInput = document.getElementById('loginPass');
-            if (toggleBtn && passInput) {
-                toggleBtn.addEventListener('click', () => {
-                    const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passInput.setAttribute('type', type);
-                    toggleBtn.classList.toggle('fa-eye');
-                    toggleBtn.classList.toggle('fa-eye-slash');
-                });
+        // Global Actions and Response UI
+        window.Actions = {
+            async updateAccount() {
+                const newUser = document.getElementById('updateUser').value.trim();
+                const newPass = document.getElementById('updatePass').value;
+                const msgEl = document.getElementById('updateAccountMsg');
+                const currentUser = localStorage.getItem('dino_dash_user');
+
+                if (!newUser || !newPass) {
+                    this.showMsg(msgEl, "Lütfen tüm alanları doldurun.", "var(--pink)");
+                    return;
+                }
+                if (newPass.length < 6) {
+                    this.showMsg(msgEl, "Şifre en az 6 karakter olmalıdır.", "var(--pink)");
+                    return;
+                }
+
+                const res = await AuthManager.updateAdmin(currentUser, newUser, newPass);
+                if (res.success) {
+                    localStorage.setItem('dino_dash_user', newUser.toLowerCase());
+                    this.showMsg(msgEl, "Hesap bilgileri başarıyla güncellendi!", "#00ff88");
+                    document.getElementById('updateAccountForm').reset();
+                } else {
+                    this.showMsg(msgEl, `Hata: ${res.msg}`, "var(--pink)");
+                }
+            },
+
+            async createAdmin() {
+                const newUser = document.getElementById('newAdminUser').value.trim();
+                const newPass = document.getElementById('newAdminPass').value;
+                const msgEl = document.getElementById('createAdminMsg');
+
+                if (!newUser || !newPass) {
+                    this.showMsg(msgEl, "Lütfen tüm alanları doldurun.", "var(--pink)");
+                    return;
+                }
+                if (newPass.length < 6) {
+                    this.showMsg(msgEl, "Şifre en az 6 karakter olmalıdır.", "var(--pink)");
+                    return;
+                }
+
+                const res = await AuthManager.addAdmin(newUser, newPass);
+                if (res.success) {
+                    this.showMsg(msgEl, "Yeni yönetici başarıyla oluşturuldu!", "#00ff88");
+                    document.getElementById('createAdminForm').reset();
+                } else {
+                    const errorMsg = (res.msg === 'User already exists') ? "Bu kullanıcı adı zaten mevcut." : `Hata: ${res.msg}`;
+                    this.showMsg(msgEl, errorMsg, "var(--pink)");
+                }
+            },
+
+            showMsg(el, text, color) {
+                el.innerHTML = text;
+                el.style.color = color;
+                el.style.display = 'block';
+                el.style.animation = 'none';
+                el.offsetHeight; // trigger reflow
+                el.style.animation = 'fadeIn 0.3s ease';
+            }
+        };
+
+        AuthManager.getAdmins(); // Init
+        if(Date.now() - localStorage.getItem('dino_dash_auth') < 14400000) unlock(); // 4h session
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+             localStorage.removeItem('dino_dash_auth');
+             location.reload();
+        });
+
+        // Password Visibility Toggle
+        document.addEventListener('click', (e) => {
+            const toggle = e.target.closest('.toggle-password');
+            if (toggle) {
+                const targetId = toggle.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (input) {
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+                    toggle.classList.toggle('fa-eye', !isPassword);
+                    toggle.classList.toggle('fa-eye-slash', isPassword);
+                }
             }
         });
     </script>
 </body>
-
 </html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function run() {
+    const results = {
+        admin: await sha256('admin'),
+        AdminDino123: await sha256('AdminDino123'),
+        DinomoreOdtu2026: await sha256('DinomoreOdtu2026')
+    };
+    document.body.innerText = JSON.stringify(results);
+}
+run();
+</script>
+</body>
+</html>

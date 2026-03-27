@@ -50,7 +50,12 @@ const translations = {
     "games.kamikaze.title": "Kamikaze Strike",
     "games.voltline.title": "Voltline",
     "games.logiq.title": "Logiq Boost",
+    "games.roll.title": "Rhythm Roll",
+    "games.duck.title": "Ducks in Disguise",
+    "games.fire.title": "Fire Crew Simulator",
+    "games.drone.title": "Sky Safari FPV Drone",
     "games.play": "Play",
+    "games.wip": "W.I.P",
     "games.playersLabel": "Players",
     "games.genre.racing": "Racing",
     "games.genre.action": "Action",
@@ -128,7 +133,12 @@ const translations = {
     "games.kamikaze.title": "Kamikaze Strike",
     "games.voltline.title": "Voltline",
     "games.logiq.title": "Logiq Boost",
+    "games.roll.title": "Rhythm Roll",
+    "games.duck.title": "Ducks in Disguise",
+    "games.fire.title": "Fire Crew Simulator",
+    "games.drone.title": "Sky Safari FPV Drone",
     "games.play": "Oyna",
+    "games.wip": "W.I.P",
     "games.playersLabel": "Oyuncu",
     "games.genre.racing": "Yarış",
     "games.genre.action": "AKSİYON",
@@ -558,25 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   applyScrollMarginTop();
 
-  // === Visitor Country Tracking ===
-  if (!sessionStorage.getItem('dino_tracked')) {
-    fetch('https://ipapi.co/json/')
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.country_code) {
-          const visits = JSON.parse(localStorage.getItem('dino_visits') || '[]');
-          visits.push({
-            country: data.country_code,
-            countryName: data.country_name,
-            city: data.city || '',
-            ts: Date.now()
-          });
-          localStorage.setItem('dino_visits', JSON.stringify(visits));
-          sessionStorage.setItem('dino_tracked', '1');
-        }
-      })
-      .catch(() => { /* silently fail */ });
-  }
+
 
   // Load YouTube Iframe API
   const tag = document.createElement('script');
