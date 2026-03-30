@@ -320,6 +320,10 @@ const heroSwiper = new Swiper('.hero-slider', {
     delay: 5000,
     disableOnInteraction: false,
   },
+  navigation: {
+    nextEl: '.hero-nav-next',
+    prevEl: '.hero-nav-prev',
+  },
   allowTouchMove: true,
   on: {
     slideChange: function () {

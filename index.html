@@ -86,15 +86,10 @@
                     <i class="fab fa-discord"></i>
                 </a>
             </div>
-            <div class="language-dropdown">
-                <button class="lang-dropbtn" id="lang-menu-btn">
-                    <span id="current-lang">EN</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="lang-dropdown-content">
-                    <button onclick="changeLanguage('tr')" class="lang-option">TR</button>
-                    <button onclick="changeLanguage('en')" class="lang-option">EN</button>
-                </div>
+            <div class="language-selector header-lang">
+                <button onclick="changeLanguage('tr')" class="lang-btn">TR</button>
+                <span class="lang-separator">|</span>
+                <button onclick="changeLanguage('en')" class="lang-btn">EN</button>
             </div>
         </div>
         <div class="menu-btn">
@@ -139,7 +134,7 @@
                 <div class="swiper-slide hero-slide" style="background-image: url('SS2.jpg');"></div>
                 <div class="swiper-slide hero-slide" style="background-image: url('SS3.jpg');"></div>
                 <div class="swiper-slide hero-slide" style="background-image: url('SS4.avif');"></div>
-                <div class="swiper-slide hero-slide video-slide" data-swiper-autoplay="10000">
+                <div class="swiper-slide hero-slide video-slide" data-swiper-autoplay="7500">
                     <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 0;">
                         <source src="roll1.mp4" type="video/mp4">
                     </video>
@@ -174,6 +169,8 @@
 
 
         </div>
+        <div class="swiper-button-next hero-nav-next"></div>
+        <div class="swiper-button-prev hero-nav-prev"></div>
     </section>
 
 
