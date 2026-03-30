@@ -1,0 +1,48 @@
+        function unlock() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('dash').classList.add('active');
+            if(!document.getElementById('engineScript')) {
+                const s = document.createElement('script');
+                s.id = 'engineScript';
+                s.src = '../analytics.js';
+                s.onload = () => { console.log('Engine loaded via script tag'); };
+                document.body.appendChild(s);
+            }
+            if (window.renderAdminTables) window.renderAdminTables();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const userInput = document.getElementById('loginUser');
+            const passInput = document.getElementById('loginPass');
+
+            errorEl.style.display = 'none';
+            if(!userInput.value.trim()) { errorEl.innerText = "Lütfen kullanıcı adınızı girin."; errorEl.style.display = 'block'; return; }
+            if(!passInput.value) { errorEl.innerText = "Lütfen şifrenizi girin."; errorEl.style.display = 'block'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Giriş yapılıyor...";
+            submitBtn.style.opacity = '0.7';
+
+            if (await window.AuthManager.validate(userInput.value, passInput.value)) {
+                localStorage.setItem('dino_dash_auth', Date.now());
+                localStorage.setItem('dino_dash_user', userInput.value.trim().toLowerCase());
+                unlock();
+            } else {
+                setTimeout(() => {
+                    errorEl.innerText = "Kullanıcı adı veya şifre hatalı.";
+                    errorEl.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Giriş Yap";
+                    submitBtn.style.opacity = '1';
+                }, 400);
+            }
+        });
+
+        ['loginUser', 'loginPass'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                document.getElementById('loginError').style.display = 'none';
+            });
+        });

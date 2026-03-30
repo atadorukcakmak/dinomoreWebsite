@@ -1,0 +1,312 @@
+        window.FileSystemSync = {
+            handle: null,
+            async requestPermission() {
+                const msgEl = document.getElementById('ghMsg');
+                try {
+                    const [handle] = await window.showOpenFilePicker({
+                        types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+                        multiple: false
+                    });
+                    if (handle.name !== 'admins.json') {
+                        window.Actions.showMsg(msgEl, 'Lütfen doğru dosyayı (admins.json) seçin!', 'var(--pink)');
+                        return false;
+                    }
+                    const permission = await handle.requestPermission({ mode: 'readwrite' });
+                    if (permission !== 'granted') {
+                        window.Actions.showMsg(msgEl, 'Dosya yazma izni reddedildi.', 'var(--pink)');
+                        return false;
+                    }
+                    this.handle = handle;
+                    window.Actions.showMsg(msgEl, '<i class="fas fa-check-circle"></i> Yerel admins.json başarıyla bağlandı!', '#00ff88');
+                    window.Actions.updateGitHubStatus();
+                    return true;
+                } catch (e) {
+                    if (e.name !== 'AbortError') window.Actions.showMsg(msgEl, 'Hata: ' + e.message, 'var(--pink)');
+                    return false;
+                }
+            },
+            async write(adminsArray) {
+                if (!this.handle) return false;
+                try {
+                    const writable = await this.handle.createWritable();
+                    await writable.write(JSON.stringify(adminsArray, null, 4));
+                    await writable.close();
+                    return true;
+                } catch (e) {
+                    console.error('File write failed', e);
+                    return false;
+                }
+            }
+        };
+
+        window.AuthManager = {
+            FALLBACK_P_HASH: 'af7aadb5ac0d2e1c8e3b1dc9d6dbb98e3ccab87b15cfe04bfe899c35cb0d30f4',
+            _remoteAdmins: [],
+
+            async hash(str) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+
+            async fetchRemoteAdmins() {
+                try {
+                    const r = await fetch(`admins.json?t=${Date.now()}`);
+                    if (r.ok) this._remoteAdmins = await r.json();
+                } catch(e) { console.warn('Failed to fetch admins.json', e); }
+                return this._remoteAdmins;
+            },
+
+            getLocalAdmins() { return JSON.parse(localStorage.getItem('dino_admins_local') || '[]'); },
+            saveLocalAdmins(a) { localStorage.setItem('dino_admins_local', JSON.stringify(a)); },
+
+            getAllAdmins() {
+                const remote = this._remoteAdmins.map(a => ({ ...a, source: 'deployed' }));
+                const local = this.getLocalAdmins().map(a => ({ ...a, source: 'local' }));
+                const merged = [...remote];
+                local.forEach(la => { if (!merged.some(m => m.u === la.u)) merged.push(la); });
+                return merged;
+            },
+
+            async validate(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                await this.fetchRemoteAdmins();
+                const all = this.getAllAdmins();
+                const primary = this._remoteAdmins[0];
+                const found = all.find(a => a.u === u && (a.p === p || (primary && a.u === primary.u && p === this.FALLBACK_P_HASH)));
+                if (found) {
+                    let local = this.getLocalAdmins();
+                    const idx = local.findIndex(a => a.u === u);
+                    if (idx !== -1) local[idx].lastLogin = new Date().toISOString();
+                    else local.push({ u, name: found.name || user.trim(), lastLogin: new Date().toISOString() });
+                    this.saveLocalAdmins(local);
+                    return true;
+                }
+                return false;
+            },
+
+            async addAdmin(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                const all = this.getAllAdmins();
+                if (all.some(a => a.u === u)) return { success: false, msg: 'Kullanıcı zaten mevcut' };
+                const newAdmin = { u, p, name: user.trim(), role: 'admin', created: new Date().toISOString() };
+                
+                let local = this.getLocalAdmins();
+                local.push(newAdmin);
+                this.saveLocalAdmins(local);
+                
+                let deployed = false;
+                if (window.FileSystemSync.handle) {
+                    const fullList = this.getAllAdmins().map(a => { const copy = {...a}; delete copy.source; delete copy.lastLogin; return copy; });
+                    deployed = await window.FileSystemSync.write(fullList);
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            async deleteAdmin(uHash) {
+                const primary = this._remoteAdmins[0];
+                if (primary && uHash === primary.u) return { success: false, msg: 'Ana admin silinemez' };
+                
+                let local = this.getLocalAdmins().filter(a => a.u !== uHash);
+                this.saveLocalAdmins(local);
+                
+                let deployed = false;
+                if (window.FileSystemSync.handle) {
+                    const fullList = this.getAllAdmins().filter(a => a.u !== uHash).map(a => { const copy = {...a}; delete copy.source; delete copy.lastLogin; return copy; });
+                    deployed = await window.FileSystemSync.write(fullList);
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            async updateAdmin(oldUser, newUser, newPass) {
+                const oldU = await this.hash(oldUser.trim().toLowerCase());
+                const newU = await this.hash(newUser.trim().toLowerCase());
+                const newP = await this.hash(newPass);
+                
+                let local = this.getLocalAdmins();
+                const li = local.findIndex(a => a.u === oldU);
+                if (li !== -1) local[li] = { ...local[li], u: newU, p: newP, name: newUser.trim() };
+                else local.push({ u: newU, p: newP, name: newUser.trim(), created: new Date().toISOString() });
+                this.saveLocalAdmins(local);
+                
+                let deployed = false;
+                if (window.FileSystemSync.handle) {
+                    const fullList = this.getAllAdmins().map(a => {
+                        const copy = {...a}; delete copy.source; delete copy.lastLogin;
+                        if(copy.u === oldU) return { ...copy, u: newU, p: newP, name: newUser.trim() };
+                        return copy;
+                    });
+                    deployed = await window.FileSystemSync.write(fullList);
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            migrateOldFormat() {
+                const old = JSON.parse(localStorage.getItem('dino_admins') || '[]');
+                if (old.length > 0) {
+                    const local = this.getLocalAdmins();
+                    old.forEach(o => { if (!local.some(l => l.u === o.u)) local.push({ ...o, source: 'migrated' }); });
+                    this.saveLocalAdmins(local);
+                    localStorage.removeItem('dino_admins');
+                }
+            }
+        };
+
+        window.renderAdminTables = function() {
+            const admins = AuthManager.getAllAdmins();
+            const localAdmins = AuthManager.getLocalAdmins();
+            const now = Date.now();
+            
+            const tbodyActive = document.getElementById('activeAdminsTable');
+            const tbodyAll = document.getElementById('allAdminsTable');
+            if(tbodyActive) {
+                const active = localAdmins.filter(a => a.lastLogin && (now - new Date(a.lastLogin).getTime() < 86400000));
+                tbodyActive.innerHTML = active.map(a => `
+                    <tr>
+                        <td style="font-weight:600;"><i class="fas fa-circle" style="color:#00ff88; font-size:0.5rem; margin-right:4px;"></i>${a.name}</td>
+                        <td>${new Date(a.lastLogin).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                        <td><span style="color:#00ff88; background:rgba(0,255,136,0.1); padding:2px 6px; border-radius:4px; font-size:0.7rem;">Çevrimiçi</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="3" style="text-align:center; opacity:0.5; padding:10px;">Son 24 saatte giriş yok</td></tr>';
+            }
+
+            if(tbodyAll) {
+                tbodyAll.innerHTML = admins.map(a => {
+                    const isDeployed = a.source === 'deployed';
+                    const isPrimary = admins[0] && a.u === admins[0].u;
+                    let actionBtn = isPrimary ? '<span style="opacity:0.5;">Ana Hesap</span>' : `<button class="btn" style="padding:4px 8px; font-size:0.7rem; border-color:var(--pink); color:var(--pink);" onclick="window.Actions.handleDeleteAdmin('${a.u}')"><i class="fas fa-trash"></i></button>`;
+                    return `
+                    <tr>
+                        <td style="font-weight:600;"><i class="fas ${isDeployed ? 'fa-cloud' : 'fa-laptop'}" style="color:${isDeployed ? 'var(--accent)' : 'var(--text-muted)'}; margin-right:4px;" title="${isDeployed ? 'Deployed via GitHub' : 'Local Only'}"></i>${a.name}</td>
+                        <td>${a.created ? new Date(a.created).toLocaleDateString() : 'Bilinmiyor'}</td>
+                        <td style="text-align:right;">${actionBtn}</td>
+                    </tr>
+                    `;
+                }).join('');
+            }
+        };
+
+        window.Actions = {
+            showMsg(el, html, color) {
+                el.innerHTML = html;
+                el.style.color = color;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 4000);
+            },
+
+            showDeployResult(el, success, type) {
+                el.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.05); padding:10px; border-radius:6px; border-left:3px solid ${success ? '#00ff88' : 'var(--pink)'}; margin-top:10px;">
+                        <p style="color:${success ? '#00ff88' : 'var(--pink)'}; font-weight:600; margin-bottom:4px;">
+                            ${success ? '<i class="fas fa-check-circle"></i> Başarılı' : '<i class="fas fa-exclamation-circle"></i> Sadece Yerel'}
+                        </p>
+                        <p style="color:var(--text-muted); font-size:0.75rem;">
+                            ${type}
+                        </p>
+                        ${success ? '<p style="color:var(--text-muted); font-size:0.75rem; margin-top:6px;"><i class="fas fa-check-circle" style="color:#00ff88"></i> Yerel Dosya Güncellendi (GitHub Desktop üzerinden pushlayınız).</p>' : '<p style="color:var(--pink); font-size:0.75rem; margin-top:6px;">Dosya Bağlantısı Yok! (Ayarlardan "Yerel Senkronizasyon" kurun)</p>'}
+                    </div>
+                `;
+                el.style.display = 'block';
+                el.style.color = 'inherit';
+                el.style.animation = 'fadeIn 0.5s ease';
+            },
+
+            async updateAccount() {
+                const u = document.getElementById('updateUser').value;
+                const p = document.getElementById('updatePass').value;
+                const msgEl = document.getElementById('updateAccountMsg');
+                if(!u || !p) { this.showMsg(msgEl, "Lütfen tüm alanları doldurun.", "var(--pink)"); return; }
+                if(p.length < 6) { this.showMsg(msgEl, "Şifre en az 6 karakter olmalıdır.", "var(--pink)"); return; }
+                msgEl.style.display = 'block';
+                msgEl.style.color = 'var(--accent)';
+                msgEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Güncelleniyor...';
+                
+                const currentU = localStorage.getItem('dino_current_admin_u') || window.currentAdminUsername;
+                const res = await window.AuthManager.updateAdmin(currentU, u, p);
+                
+                if (res.deployed) {
+                    this.showDeployResult(msgEl, true, 'Hesap bilgileri güncellendi ve GitHub Desktop için kaydedildi!');
+                } else {
+                    this.showDeployResult(msgEl, false, 'Hesap yerel olarak (tarayıcıya) güncellendi ancak yerel dosya güncellenemedi.');
+                }
+                
+                localStorage.setItem('dino_current_admin_u', u);
+                window.currentAdminUsername = u;
+                document.getElementById('updateUser').value = '';
+                document.getElementById('updatePass').value = '';
+            },
+
+            async createAdmin() {
+                const newUser = document.getElementById('newAdminUser').value;
+                const newPass = document.getElementById('newAdminPass').value;
+                const msgEl = document.getElementById('createAdminMsg');
+                if(!newUser || !newPass) { this.showMsg(msgEl, "Lütfen tüm alanları doldurun.", "var(--pink)"); return; }
+                if(newPass.length < 6) { this.showMsg(msgEl, "Şifre en az 6 karakter olmalıdır.", "var(--pink)"); return; }
+                
+                msgEl.style.display = 'block';
+                msgEl.style.color = 'var(--accent)';
+                msgEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Hesap oluşturuluyor...';
+                
+                const res = await window.AuthManager.addAdmin(newUser, newPass);
+                if (res.success) {
+                    if (res.deployed) {
+                        this.showDeployResult(msgEl, true, `"${newUser}" admin hesabı eklendi ve GitHub Desktop için kaydedildi!`);
+                    } else {
+                        this.showDeployResult(msgEl, false, `"${newUser}" yerel olarak belleğe kaydedildi ancak dosya senkronizasyonu yok.`);
+                    }
+                    document.getElementById('newAdminUser').value = '';
+                    document.getElementById('newAdminPass').value = '';
+                } else {
+                    this.showMsg(msgEl, `Hata: ${res.msg}`, "var(--pink)");
+                }
+            },
+
+            addDemo() {
+                if(!confirm('Demo verileri yüklemek istiyor musunuz? Mevcut veriler zarar görmez.')) return;
+                let d = JSON.parse(localStorage.getItem('dino_visits') || '[]');
+                const today = new Date();
+                for(let i=0; i<30; i++) {
+                    const dt = new Date(today);
+                    dt.setDate(today.getDate() - i);
+                    const v = Math.floor(Math.random() * 50) + 10;
+                    for(let j=0; j<v; j++) {
+                        d.push({
+                            page: ['index', 'dino-merger', 'dino-memory'][Math.floor(Math.random()*3)],
+                            time: dt.toISOString(),
+                            platform: Math.random() > 0.3 ? 'Windows' : 'Android',
+                            device: Math.random() > 0.4 ? 'Desktop' : 'Mobile',
+                            lang: Math.random() > 0.5 ? 'tr' : 'en'
+                        });
+                    }
+                }
+                localStorage.setItem('dino_visits', JSON.stringify(d));
+                const msgEl = document.getElementById('utilsMsg');
+                window.Actions.showMsg(msgEl, "Demo verileri başarıyla eklendi! Yenileyiniz...", "#00ff88");
+                setTimeout(()=>location.reload(), 1500);
+            },
+
+            updateGitHubStatus() {
+                const el = document.getElementById('ghStatus');
+                if (!el) return;
+                const hasToken = !!window.FileSystemSync.handle;
+                el.className = `gh-status ${hasToken ? 'gh-connected' : 'gh-disconnected'}`;
+                el.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem;"></i> ${hasToken ? 'Bağlı' : 'Bağlı Değil'}`;
+            },
+
+            async handleDeleteAdmin(uHash) {
+                if (!confirm('Bu admin hesabını silmek istediğinize emin misiniz?')) return;
+                const res = await window.AuthManager.deleteAdmin(uHash);
+                if (!res.success) { alert(res.msg); return; }
+                if (res.deployed) {
+                    alert('Admin silindi ve admins.json güncellendi! GitHub Desktop üzerinden görebilirsiniz.');
+                } else {
+                    alert('Admin sadece tarayıcı belleğinden silindi! Bağlı bir dosya yoktu.');
+                }
+            }
+        };
+
+        window.addEventListener('load', () => window.AuthManager.migrateOldFormat());

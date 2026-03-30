@@ -1,0 +1,432 @@
+﻿        window.AuthManager = {
+            REPO: 'atadorukcakmak/dinomoreWebsite',
+            FILE_PATH: 'admin/admins.json',
+            FALLBACK_P_HASH: 'af7aadb5ac0d2e1c8e3b1dc9d6dbb98e3ccab87b15cfe04bfe899c35cb0d30f4',
+            _remoteAdmins: [],
+            _fileSha: null,
+
+            async hash(str) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+
+            getToken() { return localStorage.getItem('dino_gh_token') || ''; },
+            setToken(t) { localStorage.setItem('dino_gh_token', t); },
+
+            async fetchRemoteAdmins() {
+                try {
+                    const r = await fetch(`admins.json?t=${Date.now()}`);
+                    if (r.ok) this._remoteAdmins = await r.json();
+                } catch(e) { console.warn('Failed to fetch admins.json', e); }
+                return this._remoteAdmins;
+            },
+
+            async fetchGitHubFile() {
+                const token = this.getToken();
+                if (!token) return null;
+                try {
+                    const r = await fetch(`https://api.github.com/repos/${this.REPO}/contents/${this.FILE_PATH}`, {
+                        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (r.ok) { const d = await r.json(); this._fileSha = d.sha; return JSON.parse(atob(d.content)); }
+                } catch(e) { console.warn('GitHub fetch failed', e); }
+                return null;
+            },
+
+            async pushToGitHub(admins, msg) {
+                const token = this.getToken();
+                if (!token) return { success: false, msg: 'GitHub token ayarlanmam├ä┬▒├à┼©' };
+                try {
+                    if (!this._fileSha) await this.fetchGitHubFile();
+                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(admins, null, 4))));
+                    const r = await fetch(`https://api.github.com/repos/${this.REPO}/contents/${this.FILE_PATH}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg || 'Admin update', content, sha: this._fileSha })
+                    });
+                    if (r.ok) { const d = await r.json(); this._fileSha = d.content.sha; return { success: true }; }
+                    const err = await r.json();
+                    return { success: false, msg: err.message || 'GitHub API error' };
+                } catch(e) { return { success: false, msg: e.message }; }
+            },
+
+            getLocalAdmins() { return JSON.parse(localStorage.getItem('dino_admins_local') || '[]'); },
+            saveLocalAdmins(a) { localStorage.setItem('dino_admins_local', JSON.stringify(a)); },
+
+            getAllAdmins() {
+                const remote = this._remoteAdmins.map(a => ({ ...a, source: 'deployed' }));
+                const local = this.getLocalAdmins().map(a => ({ ...a, source: 'local' }));
+                const merged = [...remote];
+                local.forEach(la => { if (!merged.some(m => m.u === la.u)) merged.push(la); });
+                return merged;
+            },
+
+            async validate(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                await this.fetchRemoteAdmins();
+                const all = this.getAllAdmins();
+                const primary = this._remoteAdmins[0];
+                const found = all.find(a => a.u === u && (a.p === p || (primary && a.u === primary.u && p === this.FALLBACK_P_HASH)));
+                if (found) {
+                    let local = this.getLocalAdmins();
+                    const idx = local.findIndex(a => a.u === u);
+                    if (idx !== -1) local[idx].lastLogin = new Date().toISOString();
+                    else local.push({ u, name: found.name || user.trim(), lastLogin: new Date().toISOString() });
+                    this.saveLocalAdmins(local);
+                    return true;
+                }
+                return false;
+            },
+
+            async addAdmin(user, pass) {
+                const u = await this.hash(user.trim().toLowerCase());
+                const p = await this.hash(pass);
+                const all = this.getAllAdmins();
+                if (all.some(a => a.u === u)) return { success: false, msg: 'User already exists' };
+                const newAdmin = { u, p, name: user.trim(), role: 'admin', created: new Date().toISOString() };
+                // Yerel kay├ä┬▒t
+                let local = this.getLocalAdmins();
+                local.push(newAdmin);
+                this.saveLocalAdmins(local);
+                // GitHub'a otomatik push
+                let deployed = false;
+                if (this.getToken()) {
+                    const remote = await this.fetchGitHubFile() || [...this._remoteAdmins];
+                    remote.push({ u, p, name: user.trim(), role: 'admin', created: new Date().toISOString() });
+                    const res = await this.pushToGitHub(remote, `Yeni admin eklendi: ${user.trim()}`);
+                    deployed = res.success;
+                    if (res.success) this._remoteAdmins = remote;
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            async deleteAdmin(uHash) {
+                const primary = this._remoteAdmins[0];
+                if (primary && uHash === primary.u) return { success: false, msg: 'Ana admin silinemez' };
+                let local = this.getLocalAdmins().filter(a => a.u !== uHash);
+                this.saveLocalAdmins(local);
+                let deployed = false;
+                if (this.getToken()) {
+                    const remote = await this.fetchGitHubFile() || [...this._remoteAdmins];
+                    const filtered = remote.filter(a => a.u !== uHash);
+                    if (filtered.length < remote.length) {
+                        const res = await this.pushToGitHub(filtered, 'Admin silindi');
+                        deployed = res.success;
+                        if (res.success) this._remoteAdmins = filtered;
+                    }
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            async updateAdmin(oldUser, newUser, newPass) {
+                const oldU = await this.hash(oldUser.trim().toLowerCase());
+                const newU = await this.hash(newUser.trim().toLowerCase());
+                const newP = await this.hash(newPass);
+                // Update local
+                let local = this.getLocalAdmins();
+                const li = local.findIndex(a => a.u === oldU);
+                if (li !== -1) local[li] = { ...local[li], u: newU, p: newP, name: newUser.trim() };
+                else local.push({ u: newU, p: newP, name: newUser.trim(), created: new Date().toISOString() });
+                this.saveLocalAdmins(local);
+                // Update remote
+                let deployed = false;
+                if (this.getToken()) {
+                    const remote = await this.fetchGitHubFile() || [...this._remoteAdmins];
+                    const ri = remote.findIndex(a => a.u === oldU);
+                    if (ri !== -1) { remote[ri] = { ...remote[ri], u: newU, p: newP, name: newUser.trim() }; }
+                    else { remote.push({ u: newU, p: newP, name: newUser.trim(), role: 'admin', created: new Date().toISOString() }); }
+                    const res = await this.pushToGitHub(remote, `Admin g├â┬╝ncellendi: ${newUser.trim()}`);
+                    deployed = res.success;
+                    if (res.success) this._remoteAdmins = remote;
+                }
+                if (window.renderAdminTables) window.renderAdminTables();
+                return { success: true, deployed };
+            },
+
+            migrateOldFormat() {
+                const old = JSON.parse(localStorage.getItem('dino_admins') || '[]');
+                if (old.length > 0) {
+                    const local = this.getLocalAdmins();
+                    old.forEach(o => { if (!local.some(l => l.u === o.u)) local.push({ ...o, source: 'migrated' }); });
+                    this.saveLocalAdmins(local);
+                    localStorage.removeItem('dino_admins');
+                }
+            }
+        };
+
+        window.renderAdminTables = function() {
+            const admins = AuthManager.getAllAdmins();
+            const localAdmins = AuthManager.getLocalAdmins();
+            const now = Date.now();
+            
+            // All Admins
+            const allTbody = document.getElementById('allAdminsTable');
+            if (allTbody) {
+                allTbody.innerHTML = admins.map(a => {
+                    const isDeployed = a.source === 'deployed';
+                    const isPrimary = AuthManager._remoteAdmins[0] && a.u === AuthManager._remoteAdmins[0].u;
+                    const sourceLabel = isDeployed 
+                        ? '<span style="background:var(--accent);color:#000;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:700;">DEPLOY</span>'
+                        : '<span style="background:var(--purple);color:#fff;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:700;">YEREL</span>';
+                    const deleteBtn = isPrimary
+                        ? '<i class="fas fa-shield-alt" style="color:var(--accent);" title="Ana admin silinemez"></i>'
+                        : `<button onclick="Actions.handleDeleteAdmin('${a.u}')" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:0.85rem;" title="Sil"><i class="fas fa-trash"></i></button>`;
+                    return `<tr>
+                        <td><strong>${a.name || 'Admin'}</strong> ${sourceLabel}</td>
+                        <td>${a.created ? new Date(a.created).toLocaleDateString() : '-'}</td>
+                        <td>${deleteBtn}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Active Admins (login bilgisi localStorage'dan)
+            const activeTbody = document.getElementById('activeAdminsTable');
+            if (activeTbody) {
+                const allWithLogin = [...admins];
+                // localStorage'daki login bilgilerini ekle
+                localAdmins.forEach(la => {
+                    if (la.lastLogin) {
+                        const existing = allWithLogin.find(a => a.u === la.u);
+                        if (existing) existing.lastLogin = la.lastLogin;
+                    }
+                });
+                const activeOnes = allWithLogin.filter(a => a.lastLogin && (now - new Date(a.lastLogin).getTime() < 86400000));
+                activeTbody.innerHTML = activeOnes.map(a => `
+                    <tr>
+                        <td>${a.name || 'Admin'}</td>
+                        <td>${new Date(a.lastLogin).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                        <td><span class="pulse-dot"></span> <span style="color:#00ff88;">Aktif</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="3" style="text-align:center; opacity:0.5; padding:10px;">Son 24 saatte giri├à┼© yok</td></tr>';
+            }
+        };
+
+        function unlock() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('dash').classList.add('active');
+            if(!document.getElementById('engineScript')) {
+                const s = document.createElement('script');
+                s.id = 'engineScript';
+                s.src = '../analytics.js';
+                s.onload = () => { console.log('Engine loaded via script tag'); };
+                document.body.appendChild(s);
+            }
+            if (window.renderAdminTables) window.renderAdminTables();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const userInput = document.getElementById('loginUser');
+            const passInput = document.getElementById('loginPass');
+
+            errorEl.style.display = 'none';
+            if(!userInput.value.trim()) { errorEl.innerText = "L├â┬╝tfen kullan├ä┬▒c├ä┬▒ ad├ä┬▒n├ä┬▒z├ä┬▒ girin."; errorEl.style.display = 'block'; return; }
+            if(!passInput.value) { errorEl.innerText = "L├â┬╝tfen ├à┼©ifrenizi girin."; errorEl.style.display = 'block'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Giri├à┼© yap├ä┬▒l├ä┬▒yor...";
+            submitBtn.style.opacity = '0.7';
+
+            if (await AuthManager.validate(userInput.value, passInput.value)) {
+                localStorage.setItem('dino_dash_auth', Date.now());
+                localStorage.setItem('dino_dash_user', userInput.value.trim().toLowerCase());
+                unlock();
+            } else {
+                setTimeout(() => {
+                    errorEl.innerText = "Kullan├ä┬▒c├ä┬▒ ad├ä┬▒ veya ├à┼©ifre hatal├ä┬▒.";
+                    errorEl.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Giri├à┼© Yap";
+                    submitBtn.style.opacity = '1';
+                }, 400);
+            }
+        });
+
+        ['loginUser', 'loginPass'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                document.getElementById('loginError').style.display = 'none';
+            });
+        });
+
+        // Global Actions and Response UI
+        window.Actions = {
+            async updateAccount() {
+                const newUser = document.getElementById('updateUser').value.trim();
+                const newPass = document.getElementById('updatePass').value;
+                const msgEl = document.getElementById('updateAccountMsg');
+                const currentUser = localStorage.getItem('dino_dash_user');
+
+                if (!newUser || !newPass) {
+                    this.showMsg(msgEl, "L├â┬╝tfen t├â┬╝m alanlar├ä┬▒ doldurun.", "var(--pink)");
+                    return;
+                }
+                if (newPass.length < 6) {
+                    this.showMsg(msgEl, "├à┬Şifre en az 6 karakter olmal├ä┬▒d├ä┬▒r.", "var(--pink)");
+                    return;
+                }
+
+                this.showMsg(msgEl, '<i class="fas fa-spinner fa-spin"></i> G├â┬╝ncelleniyor...', 'var(--accent)');
+                const res = await AuthManager.updateAdmin(currentUser, newUser, newPass);
+                if (res.success) {
+                    localStorage.setItem('dino_dash_user', newUser.toLowerCase());
+                    if (res.deployed) {
+                        this.showDeployResult(msgEl, true, 'Hesap bilgileri g├â┬╝ncellendi ve GitHub\'a deploy edildi!');
+                    } else if (AuthManager.getToken()) {
+                        this.showDeployResult(msgEl, false, 'Hesap yerel olarak g├â┬╝ncellendi ancak GitHub push ba├à┼©ar├ä┬▒s├ä┬▒z.');
+                    } else {
+                        this.showMsg(msgEl, 'Hesap bilgileri ba├à┼©ar├ä┬▒yla g├â┬╝ncellendi! (Sadece yerel)', '#00ff88');
+                    }
+                    document.getElementById('updateAccountForm').reset();
+                } else {
+                    this.showMsg(msgEl, `Hata: ${res.msg}`, "var(--pink)");
+                }
+            },
+
+            async createAdmin() {
+                const newUser = document.getElementById('newAdminUser').value.trim();
+                const newPass = document.getElementById('newAdminPass').value;
+                const msgEl = document.getElementById('createAdminMsg');
+
+                if (!newUser || !newPass) {
+                    this.showMsg(msgEl, "L├â┬╝tfen t├â┬╝m alanlar├ä┬▒ doldurun.", "var(--pink)");
+                    return;
+                }
+                if (newPass.length < 6) {
+                    this.showMsg(msgEl, "├à┬Şifre en az 6 karakter olmal├ä┬▒d├ä┬▒r.", "var(--pink)");
+                    return;
+                }
+
+                this.showMsg(msgEl, '<i class="fas fa-spinner fa-spin"></i> Hesap olu├à┼©turuluyor...', 'var(--accent)');
+                const res = await AuthManager.addAdmin(newUser, newPass);
+                if (res.success) {
+                    document.getElementById('createAdminForm').reset();
+                    if (res.deployed) {
+                        this.showDeployResult(msgEl, true, `"${newUser}" admin hesab├ä┬▒ olu├à┼©turuldu ve GitHub'a deploy edildi! Netlify birka├â┬ğ dakika i├â┬ğinde yay├ä┬▒nlayacak.`);
+                    } else if (AuthManager.getToken()) {
+                        this.showDeployResult(msgEl, false, `"${newUser}" yerel olarak kaydedildi ancak GitHub push ba├à┼©ar├ä┬▒s├ä┬▒z oldu. Token'├ä┬▒n├ä┬▒z├ä┬▒ kontrol edin.`);
+                    } else {
+                        this.showDeployResult(msgEl, null, `"${newUser}" sadece bu cihazda kaydedildi. Otomatik deploy i├â┬ğin Ayarlar'dan GitHub token girin.`);
+                    }
+                } else {
+                    const errorMsg = (res.msg === 'User already exists') ? "Bu kullan├ä┬▒c├ä┬▒ ad├ä┬▒ zaten mevcut." : `Hata: ${res.msg}`;
+                    this.showMsg(msgEl, errorMsg, "var(--pink)");
+                }
+            },
+
+            showMsg(el, text, color) {
+                el.innerHTML = text;
+                el.style.color = color;
+                el.style.display = 'block';
+                el.style.animation = 'none';
+                el.offsetHeight; // trigger reflow
+                el.style.animation = 'fadeIn 0.3s ease';
+            },
+
+
+            addDemo() {
+                console.log('addDemo triggered');
+                if (window.adminEngineReady || window.generateDemoData) {
+                    console.log('Engine ready, generating data...');
+                    window.generateDemoData();
+                    const msgEl = document.getElementById('utilsMsg');
+                    window.Actions.showMsg(msgEl, "Demo verileri ba├à┼©ar├ä┬▒yla eklendi! Genel Bak├ä┬▒├à┼©'a aktar├ä┬▒l├ä┬▒yorsunuz...", "#00ff88");
+                    setTimeout(() => {
+                        console.log('Redirecting to overview...');
+                        if (window.switchSection) {
+                            window.switchSection('overview');
+                        } else {
+                            console.error('switchSection not found!');
+                            location.hash = '#overview'; // Fallback or reload
+                        }
+                    }, 1500);
+                } else {
+                    console.warn('Engine not ready yet...');
+                    const msgEl = document.getElementById('utilsMsg');
+                    window.Actions.showMsg(msgEl, "Analiz motoru y├â┬╝kleniyor, l├â┬╝tfen birka├â┬ğ saniye daha bekleyin...", "var(--yellow)");
+                    setTimeout(() => { if(window.generateDemoData) window.Actions.addDemo(); }, 2000);
+                }
+            },
+
+            showDeployResult(el, success, message) {
+                const icon = success === true ? 'fa-rocket' : success === false ? 'fa-exclamation-triangle' : 'fa-info-circle';
+                const color = success === true ? '#00ff88' : success === false ? 'var(--pink)' : 'var(--accent)';
+                const bgColor = success === true ? 'rgba(0,255,136,0.05)' : success === false ? 'rgba(255,45,149,0.05)' : 'rgba(0,242,255,0.05)';
+                const borderColor = success === true ? 'rgba(0,255,136,0.2)' : success === false ? 'rgba(255,45,149,0.2)' : 'var(--border-accent)';
+                el.innerHTML = `
+                    <div style="background:${bgColor}; border:1px solid ${borderColor}; border-radius:12px; padding:16px; margin-top:8px;">
+                        <p style="color:${color}; font-weight:700; font-size:0.85rem;">
+                            <i class="fas ${icon}"></i> ${message}
+                        </p>
+                        ${success === true ? '<p style="color:var(--text-muted); font-size:0.75rem; margin-top:6px;"><i class="fas fa-check-circle" style="color:#00ff88"></i> GitHub commit &rarr; Netlify auto-deploy tetiklendi.</p>' : ''}
+                        ${success === null ? '<p style="color:var(--text-muted); font-size:0.75rem; margin-top:6px;"><i class="fas fa-arrow-right"></i> Ayarlar &rarr; GitHub Entegrasyonu b├â┬Âl├â┬╝m├â┬╝nden token ayarlay├ä┬▒n.</p>' : ''}
+                    </div>
+                `;
+                el.style.display = 'block';
+                el.style.color = 'inherit';
+                el.style.animation = 'fadeIn 0.5s ease';
+            },
+
+            saveGitHubToken() {
+                const token = document.getElementById('ghTokenInput').value.trim();
+                const msgEl = document.getElementById('ghMsg');
+                if (!token) { this.showMsg(msgEl, 'L├â┬╝tfen token girin.', 'var(--pink)'); return; }
+                AuthManager.setToken(token);
+                document.getElementById('ghTokenInput').value = '';
+                this.updateGitHubStatus();
+                this.showMsg(msgEl, '<i class="fas fa-check-circle"></i> Token kaydedildi! Test butonuyla ba├ä┼©lant├ä┬▒y├ä┬▒ do├ä┼©rulay├ä┬▒n.', '#00ff88');
+            },
+
+            async testGitHubConnection() {
+                const msgEl = document.getElementById('ghMsg');
+                const token = AuthManager.getToken();
+                if (!token) { this.showMsg(msgEl, '├âÔÇônce bir token kaydedin.', 'var(--pink)'); return; }
+                this.showMsg(msgEl, '<i class="fas fa-spinner fa-spin"></i> Ba├ä┼©lant├ä┬▒ test ediliyor...', 'var(--accent)');
+                try {
+                    const r = await fetch(`https://api.github.com/repos/${AuthManager.REPO}`, {
+                        headers: { 'Authorization': `token ${token}` }
+                    });
+                    if (r.ok) {
+                        const data = await r.json();
+                        const canWrite = data.permissions && data.permissions.push;
+                        this.showMsg(msgEl, `<i class="fas fa-check-circle"></i> Ba├ä┼©lant├ä┬▒ ba├à┼©ar├ä┬▒l├ä┬▒! Repo: ${data.full_name} ├óÔé¼ÔÇØ Yazma izni: ${canWrite ? '├ó┼ôÔÇĞ Var' : '├ó┬Ø┼Æ Yok'}`, canWrite ? '#00ff88' : 'var(--pink)');
+                    } else {
+                        this.showMsg(msgEl, `<i class="fas fa-times-circle"></i> Ba├ä┼©lant├ä┬▒ ba├à┼©ar├ä┬▒s├ä┬▒z (${r.status}). Token'├ä┬▒ kontrol edin.`, 'var(--pink)');
+                    }
+                } catch(e) {
+                    this.showMsg(msgEl, `<i class="fas fa-times-circle"></i> Ba├ä┼©lant├ä┬▒ hatas├ä┬▒: ${e.message}`, 'var(--pink)');
+                }
+            },
+
+            removeGitHubToken() {
+                if (!confirm('GitHub token silmek istedi├ä┼©inize emin misiniz?')) return;
+                localStorage.removeItem('dino_gh_token');
+                this.updateGitHubStatus();
+                this.showMsg(document.getElementById('ghMsg'), '<i class="fas fa-check"></i> Token silindi.', 'var(--text-muted)');
+            },
+
+            updateGitHubStatus() {
+                const el = document.getElementById('ghStatus');
+                if (!el) return;
+                const hasToken = !!AuthManager.getToken();
+                el.className = `gh-status ${hasToken ? 'gh-connected' : 'gh-disconnected'}`;
+                el.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem;"></i> ${hasToken ? 'Ba├ä┼©l├ä┬▒' : 'Ba├ä┼©l├ä┬▒ De├ä┼©il'}`;
+            },
+
+            async handleDeleteAdmin(uHash) {
+                if (!confirm('Bu admin hesab├ä┬▒n├ä┬▒ silmek istedi├ä┼©inize emin misiniz?')) return;
+                const res = await AuthManager.deleteAdmin(uHash);
+                if (!res.success) { alert(res.msg); return; }
+                if (res.deployed) {
+                    alert('Admin silindi ve GitHub\'dan kald├ä┬▒r├ä┬▒ld├ä┬▒! Netlify birka├â┬ğ dakika i├â┬ğinde g├â┬╝ncelleyecek.');
+                } else if (AuthManager.getToken()) {
+                    alert('Admin yerel olarak silindi ancak GitHub push ba├à┼©ar├ä┬▒s├ä┬▒z oldu.');
+                }
+            }
+        };
+
+        AuthManager.migrateOldFormat();
