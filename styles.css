@@ -4398,33 +4398,45 @@ body:not(.light-mode) .navbar-theme-toggle .theme-switch-icon.moon {
 /* Trailer button on the cover and the popup player */
 .trailer-btn {
     position: absolute;
-    left: 12px;
-    bottom: 12px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 2;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1.1rem 1rem;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.72);
     color: #fff;
     font-family: inherit;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 3px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .trailer-btn:hover {
-    background: rgba(0, 0, 0, 0.85);
-    border-color: #fff;
+    background: rgba(0, 0, 0, 0.9);
+    letter-spacing: 4px;
 }
 
 .trailer-btn i {
-    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 0.75rem;
+    padding-left: 2px;
 }
 
 .trailer-modal {
