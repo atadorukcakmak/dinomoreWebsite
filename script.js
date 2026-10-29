@@ -764,8 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTrailer(); });
   }
 
-  // Each platform list shows 5 games; the rest scroll inside the list
-  const VISIBLE_GAMES = 5;
+  // Each platform list shows 4 games; the rest scroll inside the list
+  const VISIBLE_GAMES = 4;
   const sliders = [...document.querySelectorAll('.games-group .games-grid-new')]
     .filter(grid => grid.querySelectorAll('.game-card-new').length > VISIBLE_GAMES);
 
@@ -774,7 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.classList.toggle('at-end', atEnd);
   };
 
-  // Height of the first 5 closed cards, measured from the header strips
+  // Height of the first 4 closed cards, measured from the header strips
   const sizeSlider = grid => {
     const cards = grid.querySelectorAll('.game-card-new');
     const style = getComputedStyle(grid);

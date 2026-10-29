@@ -2748,7 +2748,7 @@ section.contact {
     color: #ffcc00;
 }
 
-/* Platform lists: 5 games visible, scroll inside the list for the rest */
+/* Platform lists: 4 games visible, scroll inside the list for the rest */
 .games-grid-new.games-slider {
     justify-content: flex-start !important;
     overflow-y: auto;
@@ -4493,4 +4493,17 @@ body:not(.light-mode) .navbar-theme-toggle .theme-switch-icon.moon {
 
 body.trailer-open {
     overflow: hidden;
+}
+
+/* Tighter gap between the games lists and the Porting section */
+#games {
+    padding-bottom: 0 !important;
+}
+
+#games .games-section-box {
+    padding-bottom: 0.5rem !important;
+}
+
+#porting {
+    padding-top: 4rem !important;
 }
