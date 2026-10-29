@@ -54,6 +54,18 @@ const translations = {
     "games.duck.title": "Ducks in Disguise",
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
+    "games.quiet.title": "Quiet Evidence",
+    "games.geoiq.title": "Geo IQ World Master",
+    "games.colorium.title": "Colorium",
+    "games.lingix.title": "Lingix Lingo",
+    "games.battalion.title": "Last Battalion Defense",
+    "games.blocky.title": "Blocky Powers",
+    "games.cat.title": "Cat Over Here!",
+    "games.doodles.title": "Hidden Doodles: Medieval Town",
+    "games.smiling.title": "The Smiling Flesh",
+    "games.lifespan.title": "Lifespan.exe",
+    "games.tennis.title": "Tennis & Padel Shop Simulator",
+    "games.paint.title": "The Paint Atelier: Replica Co.",
     "games.play": "Play",
     "games.wip": "<i class=\"fas fa-hourglass-half\"></i> Coming Soon",
     "games.playersLabel": "Players",
@@ -61,6 +73,9 @@ const translations = {
     "games.genre.action": "Action",
     "games.genre.adventure": "Adventure",
     "games.genre.puzzle": "Puzzle",
+    "games.genre.simulation": "Simulation",
+    "games.showAll": "Show All",
+    "games.showLess": "Show Less",
 
     "contact.title": "Contact Us",
     "contact.name": "Name",
@@ -137,6 +152,18 @@ const translations = {
     "games.duck.title": "Ducks in Disguise",
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
+    "games.quiet.title": "Quiet Evidence",
+    "games.geoiq.title": "Geo IQ World Master",
+    "games.colorium.title": "Colorium",
+    "games.lingix.title": "Lingix Lingo",
+    "games.battalion.title": "Last Battalion Defense",
+    "games.blocky.title": "Blocky Powers",
+    "games.cat.title": "Cat Over Here!",
+    "games.doodles.title": "Hidden Doodles: Medieval Town",
+    "games.smiling.title": "The Smiling Flesh",
+    "games.lifespan.title": "Lifespan.exe",
+    "games.tennis.title": "Tennis & Padel Shop Simulator",
+    "games.paint.title": "The Paint Atelier: Replica Co.",
     "games.play": "Oyna",
     "games.wip": "<i class=\"fas fa-hourglass-half\"></i> ÇOK YAKINDA",
     "games.playersLabel": "Oyuncu",
@@ -144,6 +171,9 @@ const translations = {
     "games.genre.action": "AKSİYON",
     "games.genre.adventure": "Macera",
     "games.genre.puzzle": "Bulmaca",
+    "games.genre.simulation": "Simülasyon",
+    "games.showAll": "Tümünü Göster",
+    "games.showLess": "Daha Az Göster",
 
     "contact.title": "İLETİŞİM",
     "contact.name": "İsim",
@@ -673,6 +703,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Toggle current item
       item.classList.toggle('expanded');
+    });
+  });
+
+  // Show the first few games per platform, the rest behind a toggle button
+  const VISIBLE_GAMES = 3;
+  document.querySelectorAll('.games-group').forEach(group => {
+    const cards = group.querySelectorAll('.game-card-new');
+    if (cards.length <= VISIBLE_GAMES) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'games-toggle';
+    button.innerHTML = '<span data-i18n="games.showAll"></span> <span class="games-toggle-count">(' + cards.length + ')</span> <i class="fas fa-chevron-down"></i>';
+    const label = button.querySelector('[data-i18n]');
+    label.textContent = translations[currentLang]['games.showAll'];
+    group.appendChild(button);
+    group.classList.add('games-group-collapsible');
+
+    button.addEventListener('click', () => {
+      const open = group.classList.toggle('show-all');
+      const key = open ? 'games.showLess' : 'games.showAll';
+      label.setAttribute('data-i18n', key);
+      label.textContent = translations[currentLang][key];
+      button.querySelector('.games-toggle-count').hidden = open;
+      button.querySelector('i').className = open ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+
+      if (!open) {
+        // Close any hidden card that was left expanded, keep the button in view
+        cards.forEach((card, i) => { if (i >= VISIBLE_GAMES) card.classList.remove('expanded'); });
+        const top = group.getBoundingClientRect().top;
+        if (top < 0) scrollToWithOffset(group);
+      }
     });
   });
 });

@@ -2738,9 +2738,47 @@ section.contact {
     color: #4dc3ff;
 }
 
+.tag-simulation {
+    border-color: rgba(176, 124, 255, 0.5);
+    color: #b07cff;
+}
+
 .tag-puzzle {
     border-color: rgba(255, 204, 0, 0.5);
     color: #ffcc00;
+}
+
+/* Platform lists: first 3 games, the rest behind "Show All" */
+.games-group-collapsible:not(.show-all) .game-card-new:nth-child(n+4) {
+    display: none !important;
+}
+
+.games-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.games-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.games-toggle-count {
+    opacity: 0.6;
 }
 
 .game-card-title {
