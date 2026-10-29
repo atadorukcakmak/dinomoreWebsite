@@ -794,13 +794,20 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.classList.add('games-slider');
     sizeSlider(grid);
     grid.addEventListener('scroll', () => updateFade(grid), { passive: true });
-    // Keep an opened card in view inside its list
+    // An opened card fits the list exactly, so its cover and trailer strip show without scrolling
     grid.querySelectorAll('.library-header').forEach(header => {
       header.addEventListener('click', () => {
+        const card = header.parentElement;
+        if (card.classList.contains('expanded')) {
+          const cover = card.querySelector('.game-card-img-container');
+          const padTop = parseFloat(getComputedStyle(grid).paddingTop);
+          const room = grid.clientHeight - padTop - header.offsetHeight - 2;
+          if (cover) cover.style.height = Math.max(240, Math.floor(room)) + 'px';
+        }
         setTimeout(() => {
-          const card = header.parentElement;
           if (card.classList.contains('expanded')) {
-            grid.scrollTo({ top: card.offsetTop, behavior: 'smooth' });
+            const padTop = parseFloat(getComputedStyle(grid).paddingTop);
+            grid.scrollTo({ top: card.offsetTop - padTop, behavior: 'smooth' });
           }
           updateFade(grid);
         }, 350);
