@@ -76,6 +76,8 @@ const translations = {
     "games.genre.simulation": "Simulation",
     "games.showAll": "Show All",
     "games.showLess": "Show Less",
+    "games.trailer": "Trailer",
+    "games.closeTrailer": "Close trailer",
 
     "contact.title": "Contact Us",
     "contact.name": "Name",
@@ -174,6 +176,8 @@ const translations = {
     "games.genre.simulation": "Simülasyon",
     "games.showAll": "Tümünü Göster",
     "games.showLess": "Daha Az Göster",
+    "games.trailer": "Fragman",
+    "games.closeTrailer": "Fragmanı kapat",
 
     "contact.title": "İLETİŞİM",
     "contact.name": "İsim",
@@ -705,6 +709,64 @@ document.addEventListener('DOMContentLoaded', () => {
       item.classList.toggle('expanded');
     });
   });
+
+  // Trailers: cards with data-trailer get a corner button that plays the video in a popup
+  const trailerCards = document.querySelectorAll('.game-card-new[data-trailer]');
+  if (trailerCards.length) {
+    const modal = document.createElement('div');
+    modal.className = 'trailer-modal';
+    modal.hidden = true;
+    modal.innerHTML =
+      '<div class="trailer-dialog" role="dialog" aria-modal="true">' +
+      '<button type="button" class="trailer-close"><i class="fas fa-times"></i></button>' +
+      '<video class="trailer-video" controls playsinline preload="none"></video>' +
+      '</div>';
+    document.body.appendChild(modal);
+    const video = modal.querySelector('video');
+    const closeBtn = modal.querySelector('.trailer-close');
+    let lastButton = null;
+
+    const closeTrailer = () => {
+      if (modal.hidden) return;
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+      modal.hidden = true;
+      document.body.classList.remove('trailer-open');
+      if (lastButton) lastButton.focus();
+    };
+
+    const openTrailer = (src, title, button) => {
+      lastButton = button;
+      modal.querySelector('.trailer-dialog').setAttribute('aria-label', title);
+      closeBtn.setAttribute('aria-label', translations[currentLang]['games.closeTrailer']);
+      video.src = src;
+      modal.hidden = false;
+      document.body.classList.add('trailer-open');
+      closeBtn.focus();
+      video.play().catch(() => { });
+    };
+
+    trailerCards.forEach(card => {
+      const container = card.querySelector('.game-card-img-container');
+      if (!container) return;
+      const title = card.querySelector('.game-card-title').textContent;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'trailer-btn';
+      button.innerHTML = '<i class="fas fa-play"></i> <span data-i18n="games.trailer"></span>';
+      button.querySelector('span').textContent = translations[currentLang]['games.trailer'];
+      button.addEventListener('click', e => {
+        e.stopPropagation();
+        openTrailer(card.getAttribute('data-trailer'), title, button);
+      });
+      container.appendChild(button);
+    });
+
+    closeBtn.addEventListener('click', closeTrailer);
+    modal.addEventListener('click', e => { if (e.target === modal) closeTrailer(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTrailer(); });
+  }
 
   // Show the first few games per platform, the rest behind a toggle button
   const VISIBLE_GAMES = 3;
