@@ -786,7 +786,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const header = cards[i].querySelector('.library-header');
       height += header.offsetHeight + 2 + margin + (i ? gap : 0);
     }
-    grid.style.maxHeight = Math.ceil(height) + 'px';
+    grid.dataset.baseHeight = Math.ceil(height);
+    applyOpenState(grid);
+  };
+
+  // While a card is open its list grows downward, and the card fits the list exactly,
+  // so the cover and trailer strip show without scrolling
+  const OPEN_EXTRA = 200;
+  const applyOpenState = grid => {
+    const base = Number(grid.dataset.baseHeight);
+    const card = grid.querySelector('.game-card-new.expanded');
+    const height = card ? base + OPEN_EXTRA : base;
+    grid.style.maxHeight = height + 'px';
+    if (card) {
+      const header = card.querySelector('.library-header');
+      const cover = card.querySelector('.game-card-img-container');
+      const padTop = parseFloat(getComputedStyle(grid).paddingTop);
+      const padBottom = parseFloat(getComputedStyle(grid).paddingBottom);
+      const room = height - padTop - padBottom - header.offsetHeight - 2;
+      if (cover) cover.style.height = Math.max(240, Math.floor(room)) + 'px';
+    }
     updateFade(grid);
   };
 
@@ -794,16 +813,11 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.classList.add('games-slider');
     sizeSlider(grid);
     grid.addEventListener('scroll', () => updateFade(grid), { passive: true });
-    // An opened card fits the list exactly, so its cover and trailer strip show without scrolling
     grid.querySelectorAll('.library-header').forEach(header => {
       header.addEventListener('click', () => {
+        // Opening a card closes cards in the other lists too
+        sliders.forEach(applyOpenState);
         const card = header.parentElement;
-        if (card.classList.contains('expanded')) {
-          const cover = card.querySelector('.game-card-img-container');
-          const padTop = parseFloat(getComputedStyle(grid).paddingTop);
-          const room = grid.clientHeight - padTop - header.offsetHeight - 2;
-          if (cover) cover.style.height = Math.max(240, Math.floor(room)) + 'px';
-        }
         setTimeout(() => {
           if (card.classList.contains('expanded')) {
             const padTop = parseFloat(getComputedStyle(grid).paddingTop);

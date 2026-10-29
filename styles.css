@@ -2750,6 +2750,7 @@ section.contact {
 
 /* Platform lists: 4 games visible, scroll inside the list for the rest */
 .games-grid-new.games-slider {
+    transition: max-height 0.4s ease;
     justify-content: flex-start !important;
     overflow-y: auto;
     overscroll-behavior: contain;
