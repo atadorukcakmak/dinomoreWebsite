@@ -76,7 +76,7 @@ const translations = {
     "games.genre.simulation": "Simulation",
     "games.showAll": "Show All",
     "games.showLess": "Show Less",
-    "games.trailer": "Trailer",
+    "games.trailer": "Watch Trailer",
     "games.closeTrailer": "Close trailer",
 
     "contact.title": "Contact Us",
@@ -176,7 +176,7 @@ const translations = {
     "games.genre.simulation": "Simülasyon",
     "games.showAll": "Tümünü Göster",
     "games.showLess": "Daha Az Göster",
-    "games.trailer": "Fragman",
+    "games.trailer": "Fragmanı İzle",
     "games.closeTrailer": "Fragmanı kapat",
 
     "contact.title": "İLETİŞİM",
