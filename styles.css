@@ -2748,37 +2748,43 @@ section.contact {
     color: #ffcc00;
 }
 
-/* Platform lists: first 3 games, the rest behind "Show All" */
-.games-group-collapsible:not(.show-all) .game-card-new:nth-child(n+4) {
-    display: none !important;
+/* Platform lists: 5 games visible, scroll inside the list for the rest */
+.games-grid-new.games-slider {
+    justify-content: flex-start !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.45) rgba(255, 255, 255, 0.06);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 60px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 60px), transparent);
 }
 
-.games-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding: 0.75rem 1.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.games-grid-new.games-slider.at-end {
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+.games-group .games-grid-new .game-card-new {
+    flex-shrink: 0;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar {
+    width: 6px;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 999px;
-    color: #fff;
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.games-toggle:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
+.games-grid-new.games-slider::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
 }
 
-.games-toggle-count {
-    opacity: 0.6;
+.games-grid-new.games-slider::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .game-card-title {

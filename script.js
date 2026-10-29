@@ -74,8 +74,6 @@ const translations = {
     "games.genre.adventure": "Adventure",
     "games.genre.puzzle": "Puzzle",
     "games.genre.simulation": "Simulation",
-    "games.showAll": "Show All",
-    "games.showLess": "Show Less",
     "games.trailer": "Watch Trailer",
     "games.closeTrailer": "Close trailer",
 
@@ -174,8 +172,6 @@ const translations = {
     "games.genre.adventure": "Macera",
     "games.genre.puzzle": "Bulmaca",
     "games.genre.simulation": "Simülasyon",
-    "games.showAll": "Tümünü Göster",
-    "games.showLess": "Daha Az Göster",
     "games.trailer": "Fragmanı İzle",
     "games.closeTrailer": "Fragmanı kapat",
 
@@ -768,37 +764,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTrailer(); });
   }
 
-  // Show the first few games per platform, the rest behind a toggle button
-  const VISIBLE_GAMES = 3;
-  document.querySelectorAll('.games-group').forEach(group => {
-    const cards = group.querySelectorAll('.game-card-new');
-    if (cards.length <= VISIBLE_GAMES) return;
+  // Each platform list shows 5 games; the rest scroll inside the list
+  const VISIBLE_GAMES = 5;
+  const sliders = [...document.querySelectorAll('.games-group .games-grid-new')]
+    .filter(grid => grid.querySelectorAll('.game-card-new').length > VISIBLE_GAMES);
 
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'games-toggle';
-    button.innerHTML = '<span data-i18n="games.showAll"></span> <span class="games-toggle-count">(' + cards.length + ')</span> <i class="fas fa-chevron-down"></i>';
-    const label = button.querySelector('[data-i18n]');
-    label.textContent = translations[currentLang]['games.showAll'];
-    group.appendChild(button);
-    group.classList.add('games-group-collapsible');
+  const updateFade = grid => {
+    const atEnd = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
+    grid.classList.toggle('at-end', atEnd);
+  };
 
-    button.addEventListener('click', () => {
-      const open = group.classList.toggle('show-all');
-      const key = open ? 'games.showLess' : 'games.showAll';
-      label.setAttribute('data-i18n', key);
-      label.textContent = translations[currentLang][key];
-      button.querySelector('.games-toggle-count').hidden = open;
-      button.querySelector('i').className = open ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+  // Height of the first 5 closed cards, measured from the header strips
+  const sizeSlider = grid => {
+    const cards = grid.querySelectorAll('.game-card-new');
+    const style = getComputedStyle(grid);
+    const gap = parseFloat(style.rowGap) || 0;
+    const cardStyle = getComputedStyle(cards[0]);
+    const margin = parseFloat(cardStyle.marginTop) + parseFloat(cardStyle.marginBottom);
+    let height = parseFloat(style.paddingTop);
+    for (let i = 0; i < VISIBLE_GAMES; i++) {
+      const header = cards[i].querySelector('.library-header');
+      height += header.offsetHeight + 2 + margin + (i ? gap : 0);
+    }
+    grid.style.maxHeight = Math.ceil(height) + 'px';
+    updateFade(grid);
+  };
 
-      if (!open) {
-        // Close any hidden card that was left expanded, keep the button in view
-        cards.forEach((card, i) => { if (i >= VISIBLE_GAMES) card.classList.remove('expanded'); });
-        const top = group.getBoundingClientRect().top;
-        if (top < 0) scrollToWithOffset(group);
-      }
+  sliders.forEach(grid => {
+    grid.classList.add('games-slider');
+    sizeSlider(grid);
+    grid.addEventListener('scroll', () => updateFade(grid), { passive: true });
+    // Keep an opened card in view inside its list
+    grid.querySelectorAll('.library-header').forEach(header => {
+      header.addEventListener('click', () => {
+        setTimeout(() => {
+          const card = header.parentElement;
+          if (card.classList.contains('expanded')) {
+            grid.scrollTo({ top: card.offsetTop, behavior: 'smooth' });
+          }
+          updateFade(grid);
+        }, 350);
+      });
     });
   });
+  window.addEventListener('resize', () => sliders.forEach(sizeSlider));
 });
 
 // Scroll ile animasyonlu fade-in
