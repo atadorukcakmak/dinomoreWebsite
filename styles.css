@@ -2738,9 +2738,54 @@ section.contact {
     color: #4dc3ff;
 }
 
+.tag-simulation {
+    border-color: rgba(176, 124, 255, 0.5);
+    color: #b07cff;
+}
+
 .tag-puzzle {
     border-color: rgba(255, 204, 0, 0.5);
     color: #ffcc00;
+}
+
+/* Platform lists: 4 games visible, scroll inside the list for the rest */
+.games-grid-new.games-slider {
+    transition: max-height 0.4s ease;
+    justify-content: flex-start !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.45) rgba(255, 255, 255, 0.06);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 60px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 60px), transparent);
+}
+
+.games-grid-new.games-slider.at-end {
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+.games-group .games-grid-new .game-card-new {
+    flex-shrink: 0;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar {
+    width: 6px;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+}
+
+.games-grid-new.games-slider::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .game-card-title {
@@ -4356,4 +4401,110 @@ body:not(.light-mode) .navbar-theme-toggle .theme-switch-icon.moon {
     display: inline-block;
     transition: all 0.3s ease;
     text-shadow: 0 0 8px var(--secondary-color);
+}
+/* Trailer button on the cover and the popup player */
+.trailer-btn {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1.1rem 1rem;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.trailer-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    letter-spacing: 4px;
+}
+
+.trailer-btn i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 0.75rem;
+    padding-left: 2px;
+}
+
+.trailer-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.88);
+}
+
+.trailer-modal[hidden] {
+    display: none;
+}
+
+.trailer-dialog {
+    position: relative;
+    width: min(1100px, 100%);
+}
+
+.trailer-video {
+    display: block;
+    width: 100%;
+    max-height: 82vh;
+    border-radius: 12px;
+    background: #000;
+}
+
+.trailer-close {
+    position: absolute;
+    top: -3rem;
+    right: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.trailer-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.trailer-open {
+    overflow: hidden;
+}
+
+/* Tighter gap between the games lists and the Porting section */
+#games {
+    padding-bottom: 0 !important;
+}
+
+#games .games-section-box {
+    padding-bottom: 0.5rem !important;
+}
+
+#porting {
+    padding-top: 4rem !important;
 }

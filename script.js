@@ -54,6 +54,18 @@ const translations = {
     "games.duck.title": "Ducks in Disguise",
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
+    "games.quiet.title": "Quiet Evidence",
+    "games.geoiq.title": "Geo IQ World Master",
+    "games.colorium.title": "Colorium",
+    "games.lingix.title": "Lingix Lingo",
+    "games.battalion.title": "Last Battalion Defense",
+    "games.blocky.title": "Blocky Powers",
+    "games.cat.title": "Cat Over Here!",
+    "games.doodles.title": "Hidden Doodles: Medieval Town",
+    "games.smiling.title": "The Smiling Flesh",
+    "games.lifespan.title": "Lifespan.exe",
+    "games.tennis.title": "Tennis & Padel Shop Simulator",
+    "games.paint.title": "The Paint Atelier: Replica Co.",
     "games.play": "Play",
     "games.wip": "<i class=\"fas fa-hourglass-half\"></i> Coming Soon",
     "games.playersLabel": "Players",
@@ -61,6 +73,9 @@ const translations = {
     "games.genre.action": "Action",
     "games.genre.adventure": "Adventure",
     "games.genre.puzzle": "Puzzle",
+    "games.genre.simulation": "Simulation",
+    "games.trailer": "Watch Trailer",
+    "games.closeTrailer": "Close trailer",
 
     "contact.title": "Contact Us",
     "contact.name": "Name",
@@ -137,6 +152,18 @@ const translations = {
     "games.duck.title": "Ducks in Disguise",
     "games.fire.title": "Fire Crew Simulator",
     "games.drone.title": "Sky Safari FPV Drone",
+    "games.quiet.title": "Quiet Evidence",
+    "games.geoiq.title": "Geo IQ World Master",
+    "games.colorium.title": "Colorium",
+    "games.lingix.title": "Lingix Lingo",
+    "games.battalion.title": "Last Battalion Defense",
+    "games.blocky.title": "Blocky Powers",
+    "games.cat.title": "Cat Over Here!",
+    "games.doodles.title": "Hidden Doodles: Medieval Town",
+    "games.smiling.title": "The Smiling Flesh",
+    "games.lifespan.title": "Lifespan.exe",
+    "games.tennis.title": "Tennis & Padel Shop Simulator",
+    "games.paint.title": "The Paint Atelier: Replica Co.",
     "games.play": "Oyna",
     "games.wip": "<i class=\"fas fa-hourglass-half\"></i> ÇOK YAKINDA",
     "games.playersLabel": "Oyuncu",
@@ -144,6 +171,9 @@ const translations = {
     "games.genre.action": "AKSİYON",
     "games.genre.adventure": "Macera",
     "games.genre.puzzle": "Bulmaca",
+    "games.genre.simulation": "Simülasyon",
+    "games.trailer": "Fragmanı İzle",
+    "games.closeTrailer": "Fragmanı kapat",
 
     "contact.title": "İLETİŞİM",
     "contact.name": "İsim",
@@ -675,6 +705,130 @@ document.addEventListener('DOMContentLoaded', () => {
       item.classList.toggle('expanded');
     });
   });
+
+  // Trailers: cards with data-trailer get a corner button that plays the video in a popup
+  const trailerCards = document.querySelectorAll('.game-card-new[data-trailer]');
+  if (trailerCards.length) {
+    const modal = document.createElement('div');
+    modal.className = 'trailer-modal';
+    modal.hidden = true;
+    modal.innerHTML =
+      '<div class="trailer-dialog" role="dialog" aria-modal="true">' +
+      '<button type="button" class="trailer-close"><i class="fas fa-times"></i></button>' +
+      '<video class="trailer-video" controls playsinline preload="none"></video>' +
+      '</div>';
+    document.body.appendChild(modal);
+    const video = modal.querySelector('video');
+    const closeBtn = modal.querySelector('.trailer-close');
+    let lastButton = null;
+
+    const closeTrailer = () => {
+      if (modal.hidden) return;
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+      modal.hidden = true;
+      document.body.classList.remove('trailer-open');
+      if (lastButton) lastButton.focus();
+    };
+
+    const openTrailer = (src, title, button) => {
+      lastButton = button;
+      modal.querySelector('.trailer-dialog').setAttribute('aria-label', title);
+      closeBtn.setAttribute('aria-label', translations[currentLang]['games.closeTrailer']);
+      video.src = src;
+      modal.hidden = false;
+      document.body.classList.add('trailer-open');
+      closeBtn.focus();
+      video.play().catch(() => { });
+    };
+
+    trailerCards.forEach(card => {
+      const container = card.querySelector('.game-card-img-container');
+      if (!container) return;
+      const title = card.querySelector('.game-card-title').textContent;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'trailer-btn';
+      button.innerHTML = '<i class="fas fa-play"></i> <span data-i18n="games.trailer"></span>';
+      button.querySelector('span').textContent = translations[currentLang]['games.trailer'];
+      button.addEventListener('click', e => {
+        e.stopPropagation();
+        openTrailer(card.getAttribute('data-trailer'), title, button);
+      });
+      container.appendChild(button);
+    });
+
+    closeBtn.addEventListener('click', closeTrailer);
+    modal.addEventListener('click', e => { if (e.target === modal) closeTrailer(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTrailer(); });
+  }
+
+  // Each platform list shows 4 games; the rest scroll inside the list
+  const VISIBLE_GAMES = 4;
+  const sliders = [...document.querySelectorAll('.games-group .games-grid-new')]
+    .filter(grid => grid.querySelectorAll('.game-card-new').length > VISIBLE_GAMES);
+
+  const updateFade = grid => {
+    const atEnd = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
+    grid.classList.toggle('at-end', atEnd);
+  };
+
+  // Height of the first 4 closed cards, measured from the header strips
+  const sizeSlider = grid => {
+    const cards = grid.querySelectorAll('.game-card-new');
+    const style = getComputedStyle(grid);
+    const gap = parseFloat(style.rowGap) || 0;
+    const cardStyle = getComputedStyle(cards[0]);
+    const margin = parseFloat(cardStyle.marginTop) + parseFloat(cardStyle.marginBottom);
+    let height = parseFloat(style.paddingTop);
+    for (let i = 0; i < VISIBLE_GAMES; i++) {
+      const header = cards[i].querySelector('.library-header');
+      height += header.offsetHeight + 2 + margin + (i ? gap : 0);
+    }
+    grid.dataset.baseHeight = Math.ceil(height);
+    applyOpenState(grid);
+  };
+
+  // While a card is open its list grows downward, and the card fits the list exactly,
+  // so the cover and trailer strip show without scrolling
+  const OPEN_EXTRA = 200;
+  const applyOpenState = grid => {
+    const base = Number(grid.dataset.baseHeight);
+    const card = grid.querySelector('.game-card-new.expanded');
+    const height = card ? base + OPEN_EXTRA : base;
+    grid.style.maxHeight = height + 'px';
+    if (card) {
+      const header = card.querySelector('.library-header');
+      const cover = card.querySelector('.game-card-img-container');
+      const padTop = parseFloat(getComputedStyle(grid).paddingTop);
+      const padBottom = parseFloat(getComputedStyle(grid).paddingBottom);
+      const room = height - padTop - padBottom - header.offsetHeight - 2;
+      if (cover) cover.style.height = Math.max(240, Math.floor(room)) + 'px';
+    }
+    updateFade(grid);
+  };
+
+  sliders.forEach(grid => {
+    grid.classList.add('games-slider');
+    sizeSlider(grid);
+    grid.addEventListener('scroll', () => updateFade(grid), { passive: true });
+    grid.querySelectorAll('.library-header').forEach(header => {
+      header.addEventListener('click', () => {
+        // Opening a card closes cards in the other lists too
+        sliders.forEach(applyOpenState);
+        const card = header.parentElement;
+        setTimeout(() => {
+          if (card.classList.contains('expanded')) {
+            const padTop = parseFloat(getComputedStyle(grid).paddingTop);
+            grid.scrollTo({ top: card.offsetTop - padTop, behavior: 'smooth' });
+          }
+          updateFade(grid);
+        }, 350);
+      });
+    });
+  });
+  window.addEventListener('resize', () => sliders.forEach(sizeSlider));
 });
 
 // Scroll ile animasyonlu fade-in
